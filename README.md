@@ -37,3 +37,17 @@ Deploy hanya file website: `index.html`, `app.js`, `styles.css`, `config.js`, `r
 ## Membuat APK Android (tambahan v10)
 
 Paket ini juga memiliki build APK otomatis dari **GitHub Actions**. Lihat [`README-APK.md`](README-APK.md) untuk langkah tanpa Android Studio. APK hasil Actions adalah **debug APK** untuk percobaan.
+
+
+## Update v11: Setujui + Tautkan + Sinkronkan
+- Admin membuka **Tim → Permintaan Persetujuan**, lalu klik **Setujui + Tautkan** dan pilih nama dari Excel.
+- Proses berjalan atomik di server: status disetujui, akun ditautkan, rak diaktifkan, dan jadwal dari tanggal hari ini serta mendatang diimpor. Bila ada masalah, seluruh perubahan dibatalkan.
+- Untuk akun yang sudah disetujui namun belum tertaut, gunakan **Tautkan ke Excel** pada daftar Anggota Aktif.
+- Admin dapat memilih **Setujui saja (tautkan nanti)** bila data Excel belum siap.
+- Nama staf yang sudah tertaut tidak dapat digunakan oleh akun lain. Pencocokan tetap manual oleh admin.
+- Update server Supabase telah dipasang pada proyek TASKMATE-REMINDER. File patch hanya mengubah `app.js` dan `sw.js`; untuk GitHub Actions gunakan paket lengkap jika dibutuhkan.
+- Foto/checklist historis tidak dihapus. Push asli APK masih memerlukan integrasi native.
+
+## Tema Pribadi v13
+
+Buka **Setelan → Tema aplikasi**. Ada 10 tema baru + tema Original, preferensi lokal per akun/HP. Lihat `README-TEMA-v13.md`.
