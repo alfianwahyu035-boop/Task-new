@@ -39,9 +39,15 @@ function personalTheme(){
  try{const saved=localStorage.getItem(personalThemeKey());return PERSONAL_THEMES.some(x=>x.id===saved)?saved:'classic'}
  catch{return 'classic'}
 }
+function personalShapeKey(){return 'taskmate-personal-shape-v1:'+String(state.user?.id||'guest')}
+function personalShape(){
+ try{const choice=localStorage.getItem(personalShapeKey());if(choice==='neo'||choice==='soft')return choice}catch{}
+ return personalTheme()==='classic'?'soft':'neo';
+}
 function applyPersonalTheme(){
  const id=personalTheme(),theme=PERSONAL_THEMES.find(x=>x.id===id)||PERSONAL_THEMES[0];
  document.documentElement.dataset.tmTheme=id;
+ document.documentElement.dataset.tmShape=personalShape();
  const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',theme.bg);
 }
 function personalThemePicker(){
@@ -59,6 +65,13 @@ function personalThemePicker(){
    </span><span class="tm-theme-option-title">${t.name}<span aria-hidden="true">${t.id===selected?'✓':''}</span></span>
    <span class="tm-theme-option-desc">${t.subtitle}</span>
   </button>`).join('')}</div>
+  <div class="tm-shape-picker" aria-label="Bentuk kartu aplikasi">
+   <div class="tm-shape-heading"><strong>Bentuk kartu</strong><span>Pilih bentuk bebas dari warna tema</span></div>
+   <div class="tm-shape-buttons">
+    <button type="button" class="tm-shape-option ${personalShape()==='neo'?'selected':''}" data-action="personal-shape" data-shape="neo" aria-pressed="${personalShape()==='neo'}"><span class="tm-shape-symbol">▣</span><span><b>Folder 3D</b><small>Tebal, tab warna & bayangan tegas</small></span></button>
+    <button type="button" class="tm-shape-option ${personalShape()==='soft'?'selected':''}" data-action="personal-shape" data-shape="soft" aria-pressed="${personalShape()==='soft'}"><span class="tm-shape-symbol">◫</span><span><b>Kartu halus</b><small>Minimalis seperti sebelumnya</small></span></button>
+   </div>
+  </div>
   <div class="tm-theme-privacy">✓ Tidak mengubah akun lain &nbsp;·&nbsp; ✓ Tidak mengubah data pekerjaan &nbsp;·&nbsp; ✓ Tidak perlu Supabase</div>
  </section>`;
 }
@@ -647,6 +660,12 @@ document.addEventListener('click',async e=>{
   if(!PERSONAL_THEMES.some(t=>t.id===choice))throw new Error('Tema tidak tersedia');
   try{localStorage.setItem(personalThemeKey(),choice)}catch{throw new Error('Penyimpanan tema pada HP ini tidak tersedia')}
   applyPersonalTheme();render();notify('Tema '+PERSONAL_THEMES.find(t=>t.id===choice).name+' aktif di akun ini');
+ }
+ else if(a==='personal-shape'){
+  const shape=String(target.dataset.shape||'');
+  if(shape!=='neo'&&shape!=='soft')throw new Error('Bentuk kartu tidak dikenal');
+  try{localStorage.setItem(personalShapeKey(),shape)}catch{throw new Error('Tidak dapat menyimpan bentuk kartu di perangkat ini')}
+  applyPersonalTheme();render();notify(shape==='neo'?'Bentuk Folder 3D aktif':'Bentuk kartu halus aktif');
  }
  else if(a==='tab'){state.tab=target.dataset.tab;state.modal=null;state.search='';render();window.scrollTo(0,0)}
  else if(a==='filter'){state.filter=target.dataset.filter;render()}

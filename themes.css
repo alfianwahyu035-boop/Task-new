@@ -145,3 +145,149 @@ html[data-tm-theme="ink"] :is(.metric,.panel,.shift-area){box-shadow:4px 5px 0 #
 html[data-tm-theme="gamer"] :is(.metric,.shift-area){border-radius:26px 26px 26px 8px!important}
 html[data-tm-theme="navy"] :is(.metric,.panel){border-radius:12px 25px 12px 25px!important}
 @media(prefers-reduced-motion:reduce){html[data-tm-theme] .bottom-nav button,html[data-tm-theme] .bottom-nav button .ico{transition:none}}
+
+
+/* TaskMate v15 • NEOfolder shapes + real icon-highlight navigation.
+   The shape is local per account AND device; no shared settings or server requests. */
+html[data-tm-theme]{
+ --tm-outline:color-mix(in srgb,var(--tm-accent,#3677ed) 62%,var(--tm-text,#111) 38%);
+ --tm-hard-shadow:color-mix(in srgb,var(--tm-accent,#3677ed) 30%,#0b1020 70%);
+ --tm-folder-tab:var(--tm-accent,#3677ed);
+ --tm-nav-bg:var(--tm-card,#fff);
+ --tm-nav-text:var(--tm-muted,#556);
+ --tm-nav-active:var(--tm-accent,#3677ed);
+ --tm-nav-active-ink:var(--tm-accent-ink,#fff);
+}
+html[data-tm-theme="classic"]{--tm-outline:#30486a;--tm-hard-shadow:#abc4ec;--tm-folder-tab:#4279f3;--tm-nav-bg:#fff;--tm-nav-text:#70819e;--tm-nav-active:#356ef4;--tm-nav-active-ink:white}
+html[data-tm-theme="wallet"]{--tm-outline:#8570b6;--tm-hard-shadow:#0b0b20;--tm-folder-tab:#bd82f8;--tm-nav-bg:#1b1c35;--tm-nav-text:#b8b4d0}
+html[data-tm-theme="moonie"]{--tm-outline:#8586d5;--tm-hard-shadow:#101045;--tm-nav-bg:#171b4e;--tm-nav-text:#b8bce2}
+html[data-tm-theme="arena"]{--tm-outline:#3bd6e7;--tm-hard-shadow:#061322;--tm-nav-bg:#071b32;--tm-nav-text:#a5d6e2}
+html[data-tm-theme="navy"]{--tm-outline:#8abcaf;--tm-hard-shadow:#10243b;--tm-nav-bg:#172c45;--tm-nav-text:#bad0e0}
+html[data-tm-theme="pop"]{--tm-outline:#141414;--tm-hard-shadow:#101010;--tm-folder-tab:#ffcf23;--tm-nav-bg:#fff;--tm-nav-text:#343434;--tm-nav-active:#fb336f;--tm-nav-active-ink:#fff}
+html[data-tm-theme="learn"]{--tm-outline:#121212;--tm-hard-shadow:#1b1b1b;--tm-nav-bg:#fff;--tm-nav-text:#545454}
+
+/* Folder-tab geometry applies to ALL themes when selected, not just Pop Folder. */
+html[data-tm-shape="neo"] :is(
+ .metric,.panel,.task-card,.shift-area,.shift-overview-card,.source-roster-panel,
+ .source-summary-card,.map-crew-card,.rack-person,.rack-directory,
+ .shift-manage-panel,.shift-progress,.shift-tab,.shift-roster-form){
+ position:relative!important;
+ overflow:visible!important;
+ border:2px solid var(--tm-outline)!important;
+ border-radius:15px!important;
+ box-shadow:5px 6px 0 var(--tm-hard-shadow)!important;
+}
+html[data-tm-shape="neo"] :is(
+ .metric,.shift-overview-card,.panel,.shift-area,.source-summary-card,.shift-tab){
+ margin-top:16px!important;
+}
+html[data-tm-shape="neo"] :is(
+ .metric,.shift-overview-card,.panel,.shift-area,.source-summary-card,.shift-tab)::before{
+ content:''!important;
+ position:absolute!important;top:-13px!important;left:13px!important;
+ height:12px!important;width:34%!important;
+ min-width:42px;max-width:150px;
+ border:2px solid var(--tm-outline)!important;
+ border-bottom:0!important;border-radius:9px 9px 0 0!important;
+ background:var(--tm-folder-tab)!important;
+ z-index:1!important;
+ pointer-events:none!important;
+}
+html[data-tm-shape="neo"] :is(.metric,.shift-overview-card,.panel,.shift-area,.source-summary-card,.shift-tab):nth-of-type(4n+2)::before{
+ background:var(--tm-highlight,#33cbbc)!important;
+}
+html[data-tm-shape="neo"] :is(.metric,.shift-overview-card,.panel,.shift-area,.source-summary-card,.shift-tab):nth-of-type(4n+3)::before{
+ background:var(--tm-accent)!important;
+}
+html[data-tm-shape="neo"] :is(.metric,.panel,.task-card,.shift-area,.shift-overview-card,.source-roster-panel,.source-summary-card,.rack-person,.map-crew-card,.shift-tab){
+ transition:background .18s,border-color .18s,box-shadow .18s!important;
+}
+/* Keep inner cards and nested photo rows readable while preserving strong outlines. */
+html[data-tm-shape="neo"] .metric-icon,
+html[data-tm-shape="neo"] .shift-area-icon{
+ border:1.7px solid var(--tm-outline)!important;
+ border-radius:9px!important;
+ box-shadow:2px 2px 0 var(--tm-hard-shadow)!important;
+}
+html[data-tm-shape="neo"] :is(.welcome,.shift-hero){
+ border:2px solid var(--tm-outline)!important;
+ border-radius:18px 18px 8px 18px!important;
+ box-shadow:6px 7px 0 var(--tm-hard-shadow)!important;
+}
+/* Fix previous Pop Folder tab stacked BEHIND cards. */
+html[data-tm-shape="neo"][data-tm-theme="pop"] :is(.metric,.shift-overview-card,.source-summary-card)::before{z-index:1!important}
+/* Selecting soft cancels v14 Pop Folder hard shapes too. */
+html[data-tm-shape="soft"][data-tm-theme="pop"] :is(
+ .metric,.panel,.task-card,.shift-area,.shift-overview-card,.source-roster-panel,.source-summary-card,.map-crew-card,.rack-person,.rack-directory,.shift-manage-panel){
+ border:1px solid var(--tm-line)!important;box-shadow:0 7px 23px #3b2b1b18!important;border-radius:var(--tm-radius)!important;
+}
+html[data-tm-shape="soft"][data-tm-theme="pop"] :is(.metric,.shift-overview-card,.source-summary-card)::before{display:none!important}
+
+.tm-shape-picker{margin-top:21px;border-top:1px solid var(--tm-line,#dbe3f0);padding-top:17px}
+.tm-shape-heading{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:11px}
+.tm-shape-heading strong{font-size:13px;color:var(--tm-text,#24354f)}
+.tm-shape-heading span{font-size:11px;color:var(--tm-muted,#687a95)}
+.tm-shape-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.tm-shape-option{cursor:pointer;display:flex;align-items:center;gap:11px;text-align:left;min-width:0;padding:12px;border-radius:13px;border:2px solid var(--tm-line,#dbe3f0);background:var(--tm-card,#fff);color:var(--tm-text,#253654)}
+.tm-shape-option.selected{border-color:var(--tm-accent,#356ef4);background:var(--tm-soft,#eef3ff);box-shadow:0 0 0 2px var(--tm-glow,#356ef422)}
+.tm-shape-option .tm-shape-symbol{font-size:23px;display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:2px solid currentColor;border-radius:7px}
+.tm-shape-option.selected .tm-shape-symbol{background:var(--tm-accent,#356ef4);color:var(--tm-accent-ink,#fff)}
+.tm-shape-option span:last-child{display:grid;gap:4px;min-width:0}
+.tm-shape-option b{font-size:12px}
+.tm-shape-option small{font-size:10px;color:var(--tm-muted,#627691);line-height:1.3}
+@media(max-width:400px){.tm-shape-buttons{grid-template-columns:1fr}}
+
+/* Navbar — six compact accessible targets; only the ICON is highlighted.
+   Unlike v14 this never paints a huge rectangle across the label. */
+@media(max-width:760px){
+ html[data-tm-theme] .bottom-nav{
+  display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:2px!important;align-items:stretch!important;
+  padding:7px 6px calc(8px + env(safe-area-inset-bottom))!important;
+  min-height:73px!important;box-sizing:border-box!important;
+  background:var(--tm-nav-bg)!important;
+  border-top:1px solid var(--tm-line,#dde3ef)!important;
+  border-radius:17px 17px 0 0!important;
+  box-shadow:0 -6px 20px var(--tm-glow,#1d36611c)!important;
+  overflow:hidden!important;
+ }
+ html[data-tm-theme] .bottom-nav > button,
+ html[data-tm-theme] .bottom-nav > button.active{
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  justify-content:center!important;gap:2px!important;
+  width:auto!important;min-width:0!important;height:auto!important;
+  min-height:52px!important;max-height:66px!important;
+  padding:3px 1px!important;border:0!important;border-radius:9px!important;
+  background:transparent!important;box-shadow:none!important;
+  transform:none!important;position:relative!important;overflow:visible!important;
+  font-size:9px!important;line-height:1.25!important;
+  color:var(--tm-nav-text)!important;
+ }
+ html[data-tm-theme] .bottom-nav > button > .ico{
+  display:grid!important;place-items:center!important;
+  flex:0 0 31px!important;width:34px!important;height:31px!important;
+  margin:0 auto 1px!important;padding:0!important;
+  border:0!important;border-radius:10px!important;
+  background:transparent!important;color:var(--tm-nav-text)!important;
+  box-shadow:none!important;font-size:19px!important;line-height:1!important;
+  transform:none!important;
+ }
+ html[data-tm-theme] .bottom-nav > button.active{
+  color:var(--tm-nav-active)!important;font-weight:800!important;
+ }
+ html[data-tm-theme] .bottom-nav > button.active > .ico{
+  background:var(--tm-nav-active)!important;
+  color:var(--tm-nav-active-ink)!important;
+  box-shadow:2px 2px 0 var(--tm-hard-shadow)!important;
+  transform:none!important;
+ }
+ html[data-tm-theme] .bottom-nav > button > span:last-child{
+  display:block!important;white-space:nowrap!important;
+  width:100%!important;max-width:100%!important;
+  overflow:hidden!important;text-align:center!important;text-overflow:ellipsis!important;
+  font-size:9px!important;line-height:13px!important;
+ }
+ html[data-tm-theme="pop"] .bottom-nav > button.active,
+ html[data-tm-theme="pop"] .bottom-nav > button.active > .ico{border:none!important}
+}
+@media(prefers-reduced-motion:reduce){.tm-shape-option{transition:none}}
