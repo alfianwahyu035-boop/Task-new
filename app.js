@@ -11,7 +11,7 @@ const niceTime = v => v ? new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'
 const dayLabel = () => new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
 const getIso = (days=0,h=18,m=0) => { const d=new Date(); d.setDate(d.getDate()+days);d.setHours(h,m,0,0);return d.toISOString(); };
 const dateLocal = v => {if(!v)return '';const d=date(v),pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;};
-const state={mode:'demo',db:null,user:{id:'demo-me',email:'demo@taskmate.local'},workspace:null,workspaces:[],joinRequests:[],members:[],profiles:[],tasks:[],checks:[],evidence:[],tab:(new URLSearchParams(location.search).get('tab')==='shift'?'shift':'home'),shiftDate:localDay(),shiftNumber:[1,2,3].includes(Number(new URLSearchParams(location.search).get('shift')))?Number(new URLSearchParams(location.search).get('shift')):1,shiftFilter:'all',shiftRoster:[],shiftLogs:[],shiftAdmins:[],shiftPics:[],shiftTaskVersions:[],shiftTaskConfigError:'',showTaskManager:false,shiftProofs:[],rackAssignments:[],rackChecks:[],rackPhotos:[],mapPhotos:[],shiftReady:false,shiftError:'',rackError:'',staffLinks:[],staffLinkError:'',filter:'all',priority:'all',search:'',reportRange:'week',modal:null,lastSync:null,realtime:null,reloading:false,reloadQueued:false,busy:false,authTab:'login',notice:''};
+const state={mode:'demo',db:null,user:{id:'demo-me',email:'demo@taskmate.local'},workspace:null,workspaces:[],joinRequests:[],members:[],profiles:[],tasks:[],checks:[],evidence:[],tab:(new URLSearchParams(location.search).get('tab')==='shift'?'shift':'home'),shiftDate:localDay(),shiftNumber:[1,2,3].includes(Number(new URLSearchParams(location.search).get('shift')))?Number(new URLSearchParams(location.search).get('shift')):1,shiftFilter:'all',shiftRoster:[],shiftLogs:[],shiftAdmins:[],shiftPics:[],shiftTaskVersions:[],shiftTaskConfigError:'',showTaskManager:false,shiftProofs:[],rackAssignments:[],rackChecks:[],rackPhotos:[],mapPhotos:[],shiftReady:false,shiftError:'',rackError:'',staffLinks:[],staffLinkError:'',filter:'all',priority:'all',search:'',reportRange:'week',photoReportDate:localDay(),photoReportShift:'all',photoReportPic:'all',photoReportItems:[],photoReportLoaded:false,photoReportBusy:false,photoReportError:'',photoReportWorkspaceId:null,modal:null,lastSync:null,realtime:null,reloading:false,reloadQueued:false,busy:false,authTab:'login',notice:''};
 let toastTimer, reloadTimer;
 const signedThumbs = new Map();
 const priorityNames={high:'Tinggi',normal:'Sedang',low:'Rendah'}, statusNames={todo:'Belum mulai',doing:'Dikerjakan',done:'Selesai'};
@@ -132,7 +132,7 @@ async function start(){
 }
 async function loadAll(){
  if(state.mode!=='cloud'){setDemo();render();return}
- if(!state.user){state.workspaces=[];state.joinRequests=[];state.workspace=null;state.tasks=[];state.shiftLogs=[];state.shiftRoster=[];state.shiftTaskVersions=[];state.shiftAdmins=[];state.shiftPics=[];state.shiftProofs=[];state.rackAssignments=[];state.rackChecks=[];state.rackPhotos=[];state.mapPhotos=[];state.staffLinks=[];unsubscribe();render();return}
+ if(!state.user){state.photoReportItems=[];state.photoReportLoaded=false;state.photoReportWorkspaceId=null;state.workspaces=[];state.joinRequests=[];state.workspace=null;state.tasks=[];state.shiftLogs=[];state.shiftRoster=[];state.shiftTaskVersions=[];state.shiftAdmins=[];state.shiftPics=[];state.shiftProofs=[];state.rackAssignments=[];state.rackChecks=[];state.rackPhotos=[];state.mapPhotos=[];state.staffLinks=[];unsubscribe();render();return}
  const [{data:list,error},{data:requests,error:requestError}]=await Promise.all([
   state.db.from('workspace_members').select('workspace_id,role,status,workspaces(id,name,invite_code,created_by)').eq('user_id',state.user.id),
   state.db.rpc('get_my_workspace_requests')
@@ -142,6 +142,7 @@ async function loadAll(){
  state.workspaces=(list||[]).filter(x=>x.status==='approved').map(x=>x.workspaces).filter(Boolean);
  const preferred=localStorage.getItem('taskmate-current-workspace');
  state.workspace=state.workspaces.find(x=>x.id===preferred)||state.workspaces[0]||null;
+ if(state.photoReportWorkspaceId!==state.workspace?.id){state.photoReportItems=[];state.photoReportLoaded=false;state.photoReportWorkspaceId=state.workspace?.id||null;}
  if(!state.workspace){state.members=[];state.tasks=[];state.checks=[];state.evidence=[];state.shiftLogs=[];state.shiftRoster=[];state.shiftTaskVersions=[];state.shiftAdmins=[];state.shiftPics=[];state.shiftProofs=[];state.rackAssignments=[];state.rackChecks=[];state.rackPhotos=[];state.mapPhotos=[];unsubscribe();render();return}
  await refreshCloud(true);
 }
@@ -217,8 +218,175 @@ function reportItems(){
 }
 function reportsPage(){
  const a=reportItems(),done=a.filter(t=>t.status==='done'),late=a.filter(overdue);
- return `<div class="section-header" style="margin-top:0"><div><h2>Rekap laporan pekerjaan</h2><p>Ringkasan tugas beserta checklist dan bukti pengerjaan</p></div><div class="seg">${[['today','Hari ini'],['week','7 hari'],['month','30 hari']].map(([v,l])=>`<button data-action="report-range" data-value="${v}" class="${state.reportRange===v?'active':''}">${l}</button>`).join('')}</div></div><div class="metrics">${metric('Total laporan',a.length,'▤','','Dalam periode ini')}${metric('Selesai',done.length,'✓','green','Tuntas dikerjakan')}${metric('Belum selesai',a.length-done.length,'⌛','amber','Sedang menunggu')}${metric('Terlambat',late.length,'!','red','Belum terselesaikan')}</div><div class="section-header"><div><h2>Detail laporan</h2><p>Unduh sebagai CSV atau bagikan ke WhatsApp</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn outline sm" data-action="copy-report">Salin laporan</button><button class="btn primary sm" data-action="export-csv">↓ Ekspor CSV</button></div></div><div class="panel table-scroll" style="padding:0">${a.length?`<table class="report-table"><thead><tr><th>Pekerjaan</th><th>Petugas</th><th>Deadline</th><th>Checklist</th><th>Bukti</th><th>Status</th></tr></thead><tbody>${a.map(t=>`<tr><td>${esc(t.title)}</td><td>${esc(memberName(t.assignee_id))}</td><td>${esc(nice(t.due_at))}</td><td>${taskChecks(t.id).filter(x=>x.is_checked).length}/${taskChecks(t.id).length}</td><td>${taskProofs(t.id).length} file</td><td><span class="status-pill ${t.status}">${statusNames[t.status]}</span></td></tr>`).join('')}</tbody></table>`:empty('▤','Belum ada laporan','Tidak ada tugas yang sesuai dengan periode ini.')}</div><div class="notice info" style="margin-top:16px">ⓘ &nbsp; Data laporan mengikuti status tugas dan checklist terbaru yang sudah disimpan.</div>`;
+ return photoReportPanel()+`<div class="section-header" style="margin-top:0"><div><h2>Rekap laporan pekerjaan</h2><p>Ringkasan tugas beserta checklist dan bukti pengerjaan</p></div><div class="seg">${[['today','Hari ini'],['week','7 hari'],['month','30 hari']].map(([v,l])=>`<button data-action="report-range" data-value="${v}" class="${state.reportRange===v?'active':''}">${l}</button>`).join('')}</div></div><div class="metrics">${metric('Total laporan',a.length,'▤','','Dalam periode ini')}${metric('Selesai',done.length,'✓','green','Tuntas dikerjakan')}${metric('Belum selesai',a.length-done.length,'⌛','amber','Sedang menunggu')}${metric('Terlambat',late.length,'!','red','Belum terselesaikan')}</div><div class="section-header"><div><h2>Detail laporan</h2><p>Unduh sebagai CSV atau bagikan ke WhatsApp</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn outline sm" data-action="copy-report">Salin laporan</button><button class="btn primary sm" data-action="export-csv">↓ Ekspor CSV</button></div></div><div class="panel table-scroll" style="padding:0">${a.length?`<table class="report-table"><thead><tr><th>Pekerjaan</th><th>Petugas</th><th>Deadline</th><th>Checklist</th><th>Bukti</th><th>Status</th></tr></thead><tbody>${a.map(t=>`<tr><td>${esc(t.title)}</td><td>${esc(memberName(t.assignee_id))}</td><td>${esc(nice(t.due_at))}</td><td>${taskChecks(t.id).filter(x=>x.is_checked).length}/${taskChecks(t.id).length}</td><td>${taskProofs(t.id).length} file</td><td><span class="status-pill ${t.status}">${statusNames[t.status]}</span></td></tr>`).join('')}</tbody></table>`:empty('▤','Belum ada laporan','Tidak ada tugas yang sesuai dengan periode ini.')}</div><div class="notice info" style="margin-top:16px">ⓘ &nbsp; Data laporan mengikuti status tugas dan checklist terbaru yang sudah disimpan.</div>`;
 }
+// TaskMate v19: galeri bukti foto Shift (cloud only), per tanggal/shift/PIC.
+// Tidak ada data foto yang disalin ke GitHub; signed URL berumur pendek.
+function photoReportFiltered(){
+ return state.photoReportItems.filter(row=>(state.photoReportShift==='all'||row.shift===Number(state.photoReportShift))
+  &&(state.photoReportPic==='all'||row.userId===state.photoReportPic));
+}
+function photoReportPicName(uid){return getProfile(uid)?.full_name||'Petugas belum dikenal'}
+function photoReportClock(ts){
+ if(!ts)return 'Tidak tercatat';
+ const d=new Date(ts);if(!Number.isFinite(d.getTime()))return 'Tidak valid';
+ return new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d)+' WIB';
+}
+function photoReportPanel(){
+ if(!isAdmin())return '';
+ const rows=photoReportFiltered();
+ const people=[...new Set(state.photoReportItems.map(x=>x.userId).filter(Boolean))];
+ const options=[...new Set([...people,...state.members.filter(x=>x.status==='approved').map(x=>x.user_id)])]
+   .map(id=>({id,name:photoReportPicName(id)})).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+ const all=state.photoReportItems.length;
+ const loading=state.photoReportBusy;
+ const racks=rows.filter(x=>x.kind==='rack').length;
+ const maps=rows.filter(x=>x.kind==='map').length;
+ const checks=rows.filter(x=>x.kind==='shift').length;
+ return `<section class="photo-report-panel" id="photo-report" aria-label="Laporan foto operasional">
+  <div class="photo-report-heading"><div><span class="photo-report-kicker">GALERI BUKTI CLOUD</span><h2>📸 Laporan Foto Shift</h2>
+    <p>Foto yang sudah tercatat di Supabase. Hanya Admin Tim yang dapat membuka galeri ini.</p></div>
+    <span class="photo-report-private">🔒 Cloud privat</span></div>
+  <div class="photo-report-filters">
+   <label>Tanggal kerja<input id="photo-report-date" type="date" class="field" value="${esc(state.photoReportDate)}" /></label>
+   <label>Shift<select id="photo-report-shift" class="field"><option value="all">Semua shift</option>${[1,2,3].map(n=>`<option value="${n}" ${state.photoReportShift===String(n)?'selected':''}>Shift ${n}</option>`).join('')}</select></label>
+   <label>PIC / petugas<select id="photo-report-pic" class="field"><option value="all">Semua petugas</option>${options.map(x=>`<option value="${esc(x.id)}" ${state.photoReportPic===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>
+  </div>
+  <div class="photo-report-toolbar">
+   <button type="button" class="btn soft sm" data-action="photo-report-load" ${loading?'disabled':''}>${loading?'Memuat foto…':'↻ Muat ulang foto'}</button>
+   <button type="button" class="btn primary sm" data-action="photo-report-pdf" ${!rows.length||loading?'disabled':''}>↓ Unduh PDF dengan foto (${rows.length})</button>
+  </div>
+  ${state.photoReportError?`<p class="photo-report-error" role="alert">${esc(state.photoReportError)}</p>`:''}
+  ${state.photoReportLoaded?`<div class="photo-report-stats"><span><b>${rows.length}</b> foto terpilih</span><span>${racks} rak</span><span>${maps} Map Do It</span><span>${checks} tugas shift</span></div>`:''}
+  ${!state.photoReportLoaded?`<p class="photo-report-empty">${loading?'Membaca bukti foto dari Supabase…':'Tekan “Muat ulang foto” untuk melihat bukti dari cloud.'}</p>`
+  :rows.length===0?`<p class="photo-report-empty">Belum ada foto terverifikasi dalam catatan database untuk filter ini. Periksa tanggal, shift, atau PIC. Foto yang hanya ada di Storage tetapi belum tercatat belum dianggap berhasil dikirim.</p>`
+  :`<div class="photo-report-grid">${rows.map(row=>`<article class="photo-report-card">
+   ${row.signedUrl?`<button class="photo-report-image" data-action="photo-report-open" data-id="${esc(row.id)}" title="Buka foto ukuran penuh"><img src="${esc(row.signedUrl)}" alt="Bukti foto ${esc(row.title)}" loading="lazy" referrerpolicy="no-referrer" /></button>`:`<div class="photo-report-image photo-report-nopreview">Preview tidak tersedia</div>`}
+   <div class="photo-report-info"><span class="photo-report-type">${esc(row.type)}</span><strong>${esc(row.title)}</strong>
+   <small>${esc(row.name)} · Shift ${row.shift}</small><small>📷 Diambil: ${esc(photoReportClock(row.capturedAt))}</small>
+   <small>☁ Diterima: ${esc(photoReportClock(row.receivedAt))}</small>
+   ${row.aiStatus?`<small>AI rak: ${esc(row.aiStatus)}</small>`:''}
+   <button type="button" class="btn outline sm" data-action="photo-report-open" data-id="${esc(row.id)}">Lihat foto</button></div>
+  </article>`).join('')}</div>`}
+  <p class="photo-report-foot">Foto asli tetap tersimpan di bucket privat Supabase. Galeri memakai link sementara; PDF diunduh ke perangkat, tidak disimpan kembali ke cloud. Total foto pada tanggal ini: ${all}.</p>
+ </section>`;
+}
+async function loadPhotoReport(){
+ if(!isAdmin()||state.mode!=='cloud'||!state.workspace)throw new Error('Laporan Foto Cloud hanya tersedia untuk Admin Tim yang sudah login.');
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(state.photoReportDate))throw new Error('Tanggal laporan tidak valid.');
+ const wid=state.workspace.id,day=state.photoReportDate,db=state.db;
+ state.photoReportBusy=true;state.photoReportError='';state.photoReportLoaded=false;render();
+ try{
+  const [rack, maps, logs, assignments]=await Promise.all([
+   db.from('shift_rack_photos').select('id,workspace_id,work_date,shift_number,assignment_id,user_id,uploaded_by,object_path,client_captured_at,server_received_at,created_at,ai_status').eq('workspace_id',wid).eq('work_date',day).order('created_at',{ascending:false}).limit(1000),
+   db.from('shift_map_photos').select('id,workspace_id,work_date,shift_number,user_id,uploaded_by,rack_note,object_path,client_captured_at,server_received_at,created_at').eq('workspace_id',wid).eq('work_date',day).order('created_at',{ascending:false}).limit(1000),
+   db.from('shift_logs').select('id,workspace_id,work_date,shift_number,item_key,completed_by').eq('workspace_id',wid).eq('work_date',day).limit(1000),
+   db.from('shift_rack_assignments').select('id,user_id,rack_name').eq('workspace_id',wid).limit(1000)
+  ]);
+  for(const q of [rack,maps,logs,assignments])if(q.error)throw q.error;
+  const rackNames=new Map((assignments.data||[]).map(x=>[x.id,x.rack_name]));
+  const shiftLogs=logs.data||[];
+  let shiftEvidence=[];
+  for(let i=0;i<shiftLogs.length;i+=100){
+   const ids=shiftLogs.slice(i,i+100).map(x=>x.id);
+   const r=await db.from('shift_evidence').select('id,log_id,uploaded_by,object_path,client_captured_at,server_received_at,created_at,mime_type').in('log_id',ids).limit(1000);
+   if(r.error)throw r.error;shiftEvidence.push(...(r.data||[]));
+  }
+  const logMap=new Map(shiftLogs.map(x=>[x.id,x]));
+  const rows=[];
+  for(const p of rack.data||[])rows.push({id:'rack:'+p.id,kind:'rack',type:'Sisir Harga',title:'Rak '+(rackNames.get(p.assignment_id)||'Kode rak tidak diketahui'),
+   userId:p.user_id,name:photoReportPicName(p.user_id),shift:p.shift_number,bucket:'shift-extra-evidence',path:p.object_path,
+   capturedAt:p.client_captured_at,receivedAt:p.server_received_at||p.created_at,aiStatus:p.ai_status,signedUrl:''});
+  for(const p of maps.data||[])rows.push({id:'map:'+p.id,kind:'map',type:'Map Do It',title:p.rack_note||'Foto display',
+   userId:p.user_id,name:photoReportPicName(p.user_id),shift:p.shift_number,bucket:'shift-extra-evidence',path:p.object_path,
+   capturedAt:p.client_captured_at,receivedAt:p.server_received_at||p.created_at,signedUrl:''});
+  for(const p of shiftEvidence){const l=logMap.get(p.log_id);if(!l)continue;if(!String(p.mime_type||'').startsWith('image/'))continue;
+   rows.push({id:'shift:'+p.id,kind:'shift',type:'Checklist Shift',title:(l.item_key||'Tugas').replace(/[-_]/g,' '),
+   userId:p.uploaded_by,name:photoReportPicName(p.uploaded_by),shift:l.shift_number,bucket:'shift-evidence',path:p.object_path,
+   capturedAt:p.client_captured_at,receivedAt:p.server_received_at||p.created_at,signedUrl:''});
+  }
+  rows.sort((a,b)=>String(b.receivedAt).localeCompare(String(a.receivedAt)));
+  // Batch signed URLs; data file tidak pernah disimpan dalam kode/HTML publik.
+  for(const bucket of ['shift-extra-evidence','shift-evidence']){
+   const grouped=rows.filter(x=>x.bucket===bucket&&x.path);
+   for(let i=0;i<grouped.length;i+=80){
+    const slice=grouped.slice(i,i+80);
+    const r=await db.storage.from(bucket).createSignedUrls(slice.map(x=>x.path),900);
+    if(r.error)throw r.error;
+    (r.data||[]).forEach((url,j)=>{if(slice[j]&&!url.error)slice[j].signedUrl=url.signedUrl||''});
+   }
+  }
+  if(state.workspace?.id!==wid||state.photoReportDate!==day)return;
+  state.photoReportItems=rows;state.photoReportLoaded=true;
+ }catch(e){state.photoReportError='Gagal memuat foto dari cloud: '+errMessage(e);state.photoReportItems=[];state.photoReportLoaded=true;}
+ finally{state.photoReportBusy=false;render()}
+}
+async function openPhotoReportFile(id){
+ if(!isAdmin()||state.mode!=='cloud')return;
+ const item=state.photoReportItems.find(x=>x.id===id);if(!item)throw new Error('Bukti foto tidak ditemukan dalam laporan.');
+ const tab=window.open('about:blank','_blank');
+ const r=await state.db.storage.from(item.bucket).createSignedUrl(item.path,120);
+ if(r.error){tab?.close();throw r.error}
+ if(tab)tab.location.href=r.data.signedUrl;
+ else window.location.href=r.data.signedUrl;
+}
+function photoReportJpeg(blob){
+ return new Promise((resolve,reject)=>{
+  const url=URL.createObjectURL(blob);const image=new Image();
+  image.onload=()=>{try{
+   const max=1250,ratio=Math.min(1,max/Math.max(image.naturalWidth,image.naturalHeight));
+   const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.naturalWidth*ratio));canvas.height=Math.max(1,Math.round(image.naturalHeight*ratio));
+   const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+   ctx.drawImage(image,0,0,canvas.width,canvas.height);
+   resolve({data:canvas.toDataURL('image/jpeg',0.74),ratio:canvas.width/canvas.height});
+  }catch(e){reject(e)}finally{URL.revokeObjectURL(url)}};
+  image.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Format gambar tidak terbaca'));};image.src=url;
+ });
+}
+async function exportPhotoReportPdf(){
+ if(!isAdmin())throw new Error('Laporan PDF khusus Admin Tim');
+ if(state.mode!=='cloud')throw new Error('Laporan PDF hanya dapat diunduh dari mode cloud');
+ const photos=photoReportFiltered();if(!photos.length)throw new Error('Tidak ada foto untuk filter ini.');
+ if(photos.length>100)throw new Error('Terlalu banyak foto untuk satu PDF di HP. Pilih satu shift atau PIC terlebih dahulu (maksimum 100 foto).');
+ if(!window.jspdf?.jsPDF)throw new Error('Pembuat PDF belum termuat. Pastikan HP memiliki koneksi internet dan refresh aplikasi.');
+ const {jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+ const w=210,h=297,margin=15;
+ pdf.setFillColor(25,38,62);pdf.rect(0,0,w,50,'F');pdf.setTextColor(255);pdf.setFont('helvetica','bold');pdf.setFontSize(18);pdf.text('TASKMATE | LAPORAN FOTO SHIFT',margin,26);
+ pdf.setFontSize(10);pdf.setTextColor(56,70,86);pdf.text('Tim: '+(state.workspace?.name||'-'),margin,66);
+ pdf.text('Tanggal kerja: '+state.photoReportDate,margin,74);
+ pdf.text('Shift: '+(state.photoReportShift==='all'?'Semua':state.photoReportShift),margin,82);
+ pdf.text('PIC: '+(state.photoReportPic==='all'?'Semua':photoReportPicName(state.photoReportPic)),margin,90);
+ pdf.text('Foto tercatat: '+photos.length,margin,98);
+ pdf.text('Dibuat: '+photoReportClock(new Date().toISOString()),margin,106);
+ pdf.setFontSize(10);pdf.setTextColor(100);pdf.text('Sumber: Supabase Storage privat + catatan database TaskMate.',margin,118);
+ pdf.setFontSize(9);pdf.text('Waktu HP pada foto perlu dibandingkan dengan waktu diterima server.',margin,125);
+ let no=0,fail=0;
+ for(const item of photos){
+  no++;pdf.addPage();pdf.setFillColor(25,38,62);pdf.rect(0,0,w,20,'F');pdf.setTextColor(255);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('FOTO BUKTI '+no+' / '+photos.length,margin,13);
+  pdf.setTextColor(38,51,67);pdf.setFont('helvetica','bold');pdf.setFontSize(14);pdf.text(pdf.splitTextToSize(item.title,180),margin,32);
+  pdf.setFont('helvetica','normal');pdf.setFontSize(9);
+  pdf.text('Jenis: '+item.type+' | Shift '+item.shift,margin,47);
+  pdf.text('PIC: '+item.name,margin,54);
+  pdf.text('Diambil: '+photoReportClock(item.capturedAt),margin,61);
+  pdf.text('Diterima server: '+photoReportClock(item.receivedAt),margin,68);
+  if(item.aiStatus)pdf.text('Status AI: '+item.aiStatus,margin,75);
+  let imageY=82;
+  try{
+   const res=await state.db.storage.from(item.bucket).createSignedUrl(item.path,120);
+   if(res.error)throw res.error;
+   const file=await fetch(res.data.signedUrl);if(!file.ok)throw new Error('HTTP '+file.status);
+   const jpg=await photoReportJpeg(await file.blob());
+   const maxW=180,maxH=195;
+   let iw=maxW,ih=iw/jpg.ratio;
+   if(ih>maxH){ih=maxH;iw=ih*jpg.ratio}
+   pdf.addImage(jpg.data,'JPEG',(w-iw)/2,imageY,iw,ih,undefined,'FAST');
+  }catch(e){fail++;pdf.setTextColor(190,64,64);pdf.text('Foto gagal dimuat dari Storage saat membuat PDF: '+String(errMessage(e)).slice(0,80),margin,90);}
+  pdf.setTextColor(123);pdf.setFontSize(8);pdf.text('Laporan internal - jangan sebarkan tanpa izin.',margin,286);
+ }
+ const filename='TaskMate_Laporan_Foto_'+state.photoReportDate+'_Shift-'+state.photoReportShift+'.pdf';
+ pdf.save(filename);notify('PDF '+photos.length+' foto dibuat'+(fail?' · '+fail+' gambar gagal dimuat':'')+'.');
+}
+
 function teamPage(){
  const code=state.workspace.invite_code,admin=isAdmin(),members=state.members.filter(m=>m.status==='approved'),pending=state.members.filter(m=>m.status==='pending'),other=state.members.filter(m=>m.status==='rejected'||m.status==='disabled');
  const adminButton=(m,action,label,cls='outline')=>`<button class="btn ${cls} sm" type="button" data-action="manage-member" data-id="${esc(m.user_id)}" data-member-action="${action}">${label}</button>`;
@@ -676,7 +844,7 @@ document.addEventListener('click',async e=>{
   try{localStorage.setItem(personalShapeKey(),shape)}catch{throw new Error('Tidak dapat menyimpan bentuk kartu di perangkat ini')}
   applyPersonalTheme();render();notify(shape==='neo'?'Bentuk Folder 3D aktif':'Bentuk kartu halus aktif');
  }
- else if(a==='tab'){state.tab=target.dataset.tab;state.modal=null;state.search='';render();window.scrollTo(0,0)}
+ else if(a==='tab'){state.tab=target.dataset.tab;state.modal=null;state.search='';render();window.scrollTo(0,0);if(state.tab==='reports'&&isAdmin()&&state.mode==='cloud'&&!state.photoReportLoaded&&!state.photoReportBusy)await loadPhotoReport()}
  else if(a==='filter'){state.filter=target.dataset.filter;render()}
  else if(a==='report-range'){state.reportRange=target.dataset.value;render()}
  else if(a==='camera-open'){await openCamera(target.dataset.kind,id)}
@@ -698,6 +866,9 @@ document.addEventListener('click',async e=>{
  else if(a==='copy-code'){await copyText(state.workspace.invite_code)}
  else if(a==='copy-report'){await copyText(reportText())}
  else if(a==='export-csv'){exportCSV()}
+ else if(a==='photo-report-load'){await loadPhotoReport()}
+ else if(a==='photo-report-open'){await openPhotoReportFile(id)}
+ else if(a==='photo-report-pdf'){await exportPhotoReportPdf()}
  else if(a==='auth-tab'){state.authTab=target.dataset.tab;render()}
  else if(a==='forgot-pass'){if(state.mode!=='cloud')return;const email=prompt('Masukkan email untuk tautan reset password:');if(email){const {error}=await state.db.auth.resetPasswordForEmail(email.trim());if(error)throw error;notify('Jika email terdaftar, tautan reset akan dikirim.')}}
  else if(a==='demo-mode'){state.mode='demo';state.user={id:'demo-me'};state.notice='';setDemo();render()}
@@ -745,6 +916,9 @@ document.addEventListener('change',async e=>{
  else if(e.target.dataset.action==='shift-rack-check'){await toggleRackCheck(e.target.dataset.id,e.target.checked)}
  else if(e.target.dataset.action==='demo-ai-status'){await simulateAiStatus(e.target.dataset.id,e.target.value)}
  else if(e.target.id==='shift-date'){state.shiftDate=e.target.value||localDay();await loadShiftCloud();render()}
+ else if(e.target.id==='photo-report-date'){state.photoReportDate=e.target.value||localDay();state.photoReportItems=[];state.photoReportLoaded=false;await loadPhotoReport()}
+ else if(e.target.id==='photo-report-shift'){const y=window.scrollY;state.photoReportShift=e.target.value;render();window.scrollTo(0,y)}
+ else if(e.target.id==='photo-report-pic'){const y=window.scrollY;state.photoReportPic=e.target.value;render();window.scrollTo(0,y)}
  else if(e.target.dataset.action==='upload-proof'){const files=e.target.files,tid=e.target.dataset.task;if(files?.length){notify('Mengunggah bukti pekerjaan…');await uploadProof(files,tid)}}
  }catch(err){showError(err);render()}
 });
