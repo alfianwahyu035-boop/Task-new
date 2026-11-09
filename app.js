@@ -1035,12 +1035,16 @@ function aiStatusBadge(photo){
  return `<span class="ai-pill ${esc(status)}">${esc(labels[status]||'Perlu diperiksa')}</span>`;
 }
 function rackProgressDetails(s=state.shiftNumber){
- const schedule=shiftScheduled(s),racks=rackListForShift(s),p=rackProgress(s);
+ const schedule=shiftScheduled(s),allRacks=rackListForShift(s),
+ racks=(state.mode==='demo'||isAdmin())?allRacks:allRacks.filter(r=>r.user_id===state.user?.id),
+ p={done:racks.filter(r=>rackCheckedWithPhoto(r,s)).length,total:racks.length,
+ photos:racks.filter(r=>!!latestRackPhoto(r.id,s)).length,
+ warnings:racks.filter(r=>latestRackPhoto(r.id,s)?.ai_status==='warning'&&!rackCheckedWithPhoto(r,s)).length};
  if(!schedule.length)return `<div class="rack-panel"><div class="notice info">Belum ada jadwal Shift ${s}; tambah petugas agar foto dan ceklis rak aktif.</div></div>`;
- if(!racks.length)return `<div class="rack-panel"><div class="notice info">Daftar rak petugas belum dimasukkan.</div></div>`;
+ if(!racks.length)return `<div class="rack-panel"><div class="notice info">${!isAdmin()&&state.mode!=='demo'?'Belum ada rak yang ditugaskan ke akun Anda pada Shift '+s+'. Minta admin menyinkronkan PIC rak.':'Daftar rak petugas belum dimasukkan.'}</div></div>`;
  const groups=[...new Set(racks.map(x=>x.user_id))];
  return `<div class="rack-panel"><div class="rack-head"><b>Foto kamera + crop tiap rak</b><span>${p.done}/${p.total} selesai</span></div>
- <div class="rack-target-stats"><span>📷 ${p.photos}/${p.total} foto rak</span><span>⚠ ${p.warnings} perlu dicek</span><span>✓ ${p.done} terverifikasi</span></div>
+ <div class="rack-target-stats">${!isAdmin()&&state.mode!=='demo'?'<span>Rak saya saja</span>':''}<span>📷 ${p.photos}/${p.total} foto rak</span><span>⚠ ${p.warnings} perlu dicek</span><span>✓ ${p.done} terverifikasi</span></div>
  ${groups.map(u=>{
   const list=racks.filter(r=>r.user_id===u),finished=list.filter(r=>rackCheckedWithPhoto(r,s)).length;
   return `<div class="rack-person"><div class="rack-person-head"><b>${esc(memberName(u))}</b><small>${finished}/${list.length} rak</small></div>
