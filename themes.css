@@ -339,3 +339,90 @@ html[data-tm-theme] .side-item .ico{display:grid;place-items:center;line-height:
  .tm-pic-row select{width:100%}
  .tm-shift-assignment{padding:15px!important}
 }
+
+
+/* v18 — Mobile Shift layout repair: folder treatment ONLY on parent cards.
+   The rack directory used to inherit overflow:visible!important and a box shadow;
+   combined with max-height:230px it visibly overlapped the add form below. */
+html[data-tm-shape="neo"] :is(.rack-directory,.shift-roster-form,.tm-rack-directory-details) {
+  position:static!important;
+  box-shadow:none!important;
+  border-radius:12px!important;
+  border:0!important;
+  margin-top:0!important;
+  overflow:initial!important;
+}
+html[data-tm-shape="neo"] :is(.rack-directory,.shift-roster-form,.tm-rack-directory-details)::before,
+html[data-tm-shape="neo"] :is(.rack-directory,.shift-roster-form,.tm-rack-directory-details)::after {
+  display:none!important;
+  content:none!important;
+}
+html[data-tm-theme] .shift-side {min-width:0;gap:20px!important;align-content:start;}
+html[data-tm-theme] .shift-side > .panel {
+  min-width:0;box-sizing:border-box;isolation:isolate;
+  padding:18px!important;
+}
+html[data-tm-theme] .tm-rack-directory-details{
+  display:block;min-width:0;border:1px solid var(--tm-line,#dce5f0)!important;
+  border-radius:13px!important;background:var(--tm-layer,#f6f8fb);
+  overflow:hidden!important;margin:14px 0!important;box-shadow:none!important;
+}
+html[data-tm-theme] .tm-rack-directory-details > summary{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  cursor:pointer;list-style:none;padding:13px 12px;
+  min-height:44px;font-size:12px;font-weight:800;
+  color:var(--tm-text,#20324b);
+}
+html[data-tm-theme] .tm-rack-directory-details > summary::-webkit-details-marker{display:none}
+html[data-tm-theme] .tm-rack-directory-details > summary::after{
+  content:'⌄';font-weight:900;font-size:18px;color:var(--tm-accent,#356ef4);
+  transition:transform .15s;
+}
+html[data-tm-theme] .tm-rack-directory-details[open] > summary::after{transform:rotate(180deg)}
+html[data-tm-theme] .tm-rack-directory-details > summary small{
+  font-size:10px;font-weight:600;color:var(--tm-muted,#728297);
+  margin-left:auto;
+}
+html[data-tm-theme] .tm-rack-directory-details .rack-directory,
+html[data-tm-shape="neo"] .tm-rack-directory-details .rack-directory{
+  display:block!important;position:static!important;box-shadow:none!important;
+  border:0!important;border-top:1px solid var(--tm-line,#dce5f0)!important;
+  border-radius:0!important;margin:0!important;padding:0!important;
+  max-height:290px!important;height:auto!important;min-height:0!important;
+  overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  background:var(--tm-card,#fff)!important;
+}
+html[data-tm-theme] .tm-rack-directory-details .rack-directory-row {
+  display:flex!important;justify-content:space-between;align-items:center;
+  gap:8px;min-width:0;min-height:52px;padding:9px 12px!important;
+  box-sizing:border-box;border-bottom:1px solid var(--tm-line,#e8edf4)!important;
+  background:transparent!important;
+}
+html[data-tm-theme] .tm-rack-directory-details .rack-directory-row:last-child{border-bottom:0!important}
+html[data-tm-theme] .tm-rack-directory-details .rack-directory-row > div{min-width:0;flex:1;}
+html[data-tm-theme] .tm-rack-directory-details .rack-directory-row strong{font-size:12px!important}
+html[data-tm-theme] .tm-rack-directory-details .rack-directory-row small{font-size:10px!important;overflow-wrap:anywhere}
+html[data-tm-theme] .tm-rack-directory-details .rack-directory-row button{
+  flex:none!important;min-height:31px!important;padding:5px 10px!important;
+  font-size:10px!important;max-width:90px!important;
+}
+html[data-tm-theme] .shift-side .shift-roster-form,
+html[data-tm-shape="neo"] .shift-side .shift-roster-form {
+  display:block!important;position:static!important;overflow:visible!important;
+  border:0!important;border-top:1px solid var(--tm-line,#e2e8ef)!important;
+  border-radius:0!important;box-shadow:none!important;
+  margin:16px 0 0!important;padding:16px 0 0!important;
+  background:transparent!important;
+}
+html[data-tm-theme] .shift-side .shift-roster-form .form-grp {margin-bottom:14px;min-width:0}
+html[data-tm-theme] .shift-side .shift-roster-form .field {display:block;width:100%;min-width:0;box-sizing:border-box}
+html[data-tm-theme] .shift-side .shift-roster-form .btn.block{width:100%;white-space:normal;line-height:1.4;min-height:48px}
+html[data-tm-theme] .shift-side .shift-roster-form p{line-height:1.6;margin-top:12px}
+@media(max-width:760px){
+  html[data-tm-theme] .shift-layout {display:flex;flex-direction:column;gap:20px!important}
+  html[data-tm-theme] .shift-area-list,html[data-tm-theme] .shift-side{width:100%;min-width:0;}
+  html[data-tm-theme] .shift-side>.panel{padding:17px!important;}
+  html[data-tm-theme] .tm-rack-directory-details > summary{flex-wrap:wrap}
+  html[data-tm-theme] .tm-rack-directory-details > summary small{font-size:9px}
+}
