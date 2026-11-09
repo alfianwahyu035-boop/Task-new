@@ -432,3 +432,96 @@ html[data-tm-shape="neo"] :is(.metric,.panel,.task-card,.shift-area,.shift-overv
 html[data-tm-shape="neo"] :is(.metric,.shift-overview-card,.panel,.shift-area,.source-summary-card,.shift-tab)::before{box-sizing:border-box!important;left:12px!important;width:min(34%,145px)!important;max-width:calc(100% - 26px)!important;min-width:0!important}
 html[data-tm-shape="neo"] :is(.shift-area,.metric,.panel,.shift-overview-card)>*{min-width:0}
 @media(max-width:760px){html[data-tm-shape="neo"] :is(.shift-area,.panel,.shift-overview-card,.source-summary-card,.metric){max-width:calc(100% - 8px)!important;margin-left:0!important;margin-right:8px!important}html[data-tm-shape="neo"] .shift-area::before{top:-11px!important;height:10px!important}}
+
+
+/* ================================================================
+ TaskMate v20 — actually solve protruding Folder 3D top edges.
+ v19.1 only reduced width; the -13px pseudo-element was untouched.
+ This moves accents INSIDE the card and keeps the outer edges clean.
+ ================================================================ */
+/* Across Neo cards, no raised folder tabs above their top border. */
+html[data-tm-shape="neo"] :is(
+ .metric,.shift-overview-card,.panel,.shift-area,.source-summary-card,.shift-tab
+)::before {
+ top:1px!important;
+ left:14px!important;
+ height:6px!important;
+ min-width:0!important;
+ max-width:calc(100% - 28px)!important;
+ width:min(34%,144px)!important;
+ border:0!important;
+ border-radius:0 0 8px 8px!important;
+ box-sizing:border-box!important;
+ pointer-events:none!important;
+}
+/* Shift-area cards have one clean outer frame: no protruding corner,
+ no detached outline from a pseudo-element and no 8px hard shadow. */
+html[data-tm-shape="neo"] .shift-layout .shift-area-list > .shift-area {
+ box-sizing:border-box!important;
+ width:calc(100% - 5px)!important;
+ max-width:calc(100% - 5px)!important;
+ min-width:0!important;
+ margin:10px 5px 10px 0!important;
+ position:relative!important;
+ overflow:hidden!important;
+ border:2px solid var(--tm-outline)!important;
+ border-radius:18px!important;
+ box-shadow:3px 4px 0 var(--tm-hard-shadow)!important;
+}
+html[data-tm-shape="neo"] .shift-layout .shift-area-list > .shift-area::before,
+html[data-tm-shape="neo"] .shift-layout .shift-area-list > .shift-area::after {
+ content:none!important;
+ display:none!important;
+ width:0!important;
+ height:0!important;
+}
+/* Replace the outside tab with a small INSIDE accent on the header. */
+html[data-tm-shape="neo"] .shift-layout .shift-area-list > .shift-area > .shift-area-head {
+ position:relative!important;
+ overflow:hidden!important;
+ border-radius:15px 15px 0 0!important;
+ padding-top:19px!important;
+}
+html[data-tm-shape="neo"] .shift-layout .shift-area-list > .shift-area > .shift-area-head::before {
+ content:''!important;
+ position:absolute!important;
+ display:block!important;
+ top:0!important;
+ left:13px!important;
+ width:min(35%,144px)!important;
+ height:6px!important;
+ background:var(--tm-folder-tab,var(--tm-accent,#356ef4))!important;
+ border:0!important;
+ border-radius:0 0 7px 7px!important;
+ box-shadow:none!important;
+ pointer-events:none!important;
+}
+html[data-tm-shape="neo"] .shift-layout .shift-area-list > .shift-area:nth-child(4n+2) > .shift-area-head::before {
+ background:var(--tm-highlight,#31bcae)!important;
+}
+html[data-tm-shape="neo"] .shift-layout .shift-area-list > .shift-area:nth-child(4n+3) > .shift-area-head::before {
+ background:var(--tm-accent,#f3b75d)!important;
+}
+/* Sidebar panels also sit flush rather than having a tab outside. */
+html[data-tm-shape="neo"] .shift-layout .shift-side > .panel {
+ box-sizing:border-box!important;
+ max-width:calc(100% - 5px)!important;
+ margin-right:5px!important;
+ border-radius:18px!important;
+ box-shadow:3px 4px 0 var(--tm-hard-shadow)!important;
+}
+html[data-tm-shape="neo"] .shift-layout .shift-side > .panel::before {
+ content:none!important;
+ display:none!important;
+}
+/* Keep cards comfortable and stop horizontal scrolling on small phones. */
+@media(max-width:760px){
+ html[data-tm-shape="neo"] .shift-layout .shift-area-list,
+ html[data-tm-shape="neo"] .shift-layout .shift-side {
+   min-width:0!important;max-width:100%!important;
+ }
+ html[data-tm-shape="neo"] .shift-layout .shift-area-list > .shift-area {
+  width:calc(100% - 5px)!important;
+  max-width:calc(100% - 5px)!important;
+ }
+}
