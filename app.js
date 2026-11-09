@@ -21,6 +21,7 @@ const tabs=[['home','Dashboard'],['shift','Checklist Shift'],['tasks','Tugas'],[
 // v13: hanya preferensi tampilan lokal berdasarkan akun login di perangkat ini.
 // Tidak disimpan ke Supabase dan tidak pernah ikut dalam data tim.
 const PERSONAL_THEMES=[
+ {id:'pop',name:'Pop Folder',subtitle:'Kartu folder · garis hitam · kuning cerah',bg:'#fff8e6',card:'#fffdf9',accent:'#ffcf23',dark:false},
  {id:'classic',name:'TaskMate Original',subtitle:'Tampilan awal yang familiar',bg:'#f5f7fb',card:'#ffffff',accent:'#356ef4',dark:false},
  {id:'wallet',name:'Midnight Wallet',subtitle:'Gelap · gradasi ungu & neon',bg:'#151629',card:'#282941',accent:'#a780ff',dark:true},
  {id:'trantor',name:'Trantor Mint',subtitle:'Putih · hitam · mint segar',bg:'#f0f4f2',card:'#ffffff',accent:'#22beb2',dark:false},
