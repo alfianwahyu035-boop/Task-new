@@ -166,6 +166,15 @@ html[data-tm-theme="navy"]{--tm-outline:#8abcaf;--tm-hard-shadow:#10243b;--tm-na
 html[data-tm-theme="pop"]{--tm-outline:#141414;--tm-hard-shadow:#101010;--tm-folder-tab:#ffcf23;--tm-nav-bg:#fff;--tm-nav-text:#343434;--tm-nav-active:#fb336f;--tm-nav-active-ink:#fff}
 html[data-tm-theme="learn"]{--tm-outline:#121212;--tm-hard-shadow:#1b1b1b;--tm-nav-bg:#fff;--tm-nav-text:#545454}
 
+html[data-tm-theme]{--tm-statusbar-bg:var(--tm-statusbar-runtime, #1f2430);}
+html[data-tm-theme="classic"]{--tm-statusbar-bg:#1f4d9d}
+html[data-tm-theme="trantor"]{--tm-statusbar-bg:#143a39}
+html[data-tm-theme="social"]{--tm-statusbar-bg:#2c2c57}
+html[data-tm-theme="gamer"]{--tm-statusbar-bg:#3442a9}
+html[data-tm-theme="melody"]{--tm-statusbar-bg:#18393b}
+html[data-tm-theme="ink"]{--tm-statusbar-bg:#2c2532}
+html[data-tm-theme="learn"]{--tm-statusbar-bg:#181818}
+
 /* Folder-tab geometry applies to ALL themes when selected, not just Pop Folder. */
 html[data-tm-shape="neo"] :is(
  .metric,.panel,.task-card,.shift-area,.shift-overview-card,.source-roster-panel,
@@ -290,4 +299,43 @@ html[data-tm-shape="soft"][data-tm-theme="pop"] :is(.metric,.shift-overview-card
  html[data-tm-theme="pop"] .bottom-nav > button.active,
  html[data-tm-theme="pop"] .bottom-nav > button.active > .ico{border:none!important}
 }
+
+/* Better-looking icons + a clearer status-bar area on mobile */
+html[data-tm-theme] .side-item .ico svg,
+html[data-tm-theme] .bottom-nav .ico svg{width:1em;height:1em;display:block;stroke:currentColor;fill:none}
+html[data-tm-theme] .side-item .ico{display:grid;place-items:center;line-height:1}
+@media(max-width:760px){
+ html[data-tm-theme] body::before{content:'';position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 12px);background:var(--tm-statusbar-bg);z-index:59;pointer-events:none}
+ html[data-tm-theme] .main{padding-top:calc(env(safe-area-inset-top) + 14px)!important}
+ html[data-tm-theme] .topbar{margin-top:2px}
+ html[data-tm-theme] .bottom-nav > button > .ico{width:36px!important;height:33px!important;border-radius:12px!important;font-size:0!important}
+ html[data-tm-theme] .bottom-nav > button > .ico svg{width:20px!important;height:20px!important;stroke-width:2.1}
+ html[data-tm-theme] .bottom-nav > button.active > .ico{box-shadow:0 6px 14px var(--tm-glow,#1d36611c),2px 2px 0 var(--tm-hard-shadow)!important}
+ html[data-tm-theme] .bottom-nav > button.active > span:last-child{font-weight:900!important}
+}
+
 @media(prefers-reduced-motion:reduce){.tm-shape-option{transition:none}}
+
+/* v17 — Pengelolaan PIC per shift / tanggal. Mengikuti palet tema masing-masing akun. */
+.tm-shift-assignment{padding:20px!important;margin:15px 0 19px;min-width:0}
+.tm-shift-assignment .shift-summary-head{align-items:center;gap:10px}
+.tm-shift-assignment .shift-summary-head h3{font-size:15px}
+.tm-shift-assignment .shift-summary-head>b{font-size:11px;color:var(--tm-accent,#3479e6);white-space:nowrap}
+.tm-shift-admin-picker{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,1.3fr);gap:15px;align-items:center;padding:13px 0;border-bottom:1px solid var(--tm-line,#e7e9f0)}
+.tm-shift-admin-picker label{display:grid;gap:3px}
+.tm-shift-admin-picker label b{font-size:12px}
+.tm-shift-admin-picker label small{font-size:10px;color:var(--tm-muted,#8a99ad)}
+.tm-shift-assignment .field{background:var(--tm-layer,#fff)!important;color:var(--tm-text,#1c2b3e)!important;border:1px solid var(--tm-line,#d9e2ed)!important;min-width:0}
+.tm-pic-list{display:grid;gap:0;margin-top:10px}
+.tm-pic-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(145px,1fr);align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--tm-line,#e7e9f0)}
+.tm-pic-row:last-child{border-bottom:0}
+.tm-pic-row>div{min-width:0;display:grid;gap:3px}
+.tm-pic-row strong{font-size:12px;line-height:1.35}
+.tm-pic-row small{font-size:10px;color:var(--tm-muted,#8a99ad)}
+.tm-pic-row select{width:100%;font-size:11px;padding:10px 8px}
+.tm-pic-indicator{display:inline-block!important;color:var(--tm-accent,#326ee9)!important;font-weight:800;margin-top:6px;font-size:11px!important}
+@media(max-width:480px){
+ .tm-shift-admin-picker,.tm-pic-row{grid-template-columns:1fr;gap:7px}
+ .tm-pic-row select{width:100%}
+ .tm-shift-assignment{padding:15px!important}
+}
