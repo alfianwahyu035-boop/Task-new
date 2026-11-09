@@ -5,7 +5,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'www');
 // Hanya file web publik yang boleh masuk APK. File jadwal/PIC rahasia jangan ditambahkan ke daftar ini.
 const assets = [
-  'index.html','app.js','styles.css','config.js','excel-import.js',
+  'index.html','app.js','styles.css','themes.css','config.js','excel-import.js',
   'roster-data.js','sw.js','manifest.webmanifest',
   'Template_Import_TaskMate_Jadwal_Rak.xlsx',
   'icons/icon-192.png','icons/icon-512.png'
