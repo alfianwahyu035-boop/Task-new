@@ -426,3 +426,9 @@ html[data-tm-theme] .shift-side .shift-roster-form p{line-height:1.6;margin-top:
   html[data-tm-theme] .tm-rack-directory-details > summary{flex-wrap:wrap}
   html[data-tm-theme] .tm-rack-directory-details > summary small{font-size:9px}
 }
+
+/* v19.1: Keep Folder 3D tabs and hard shadows within card columns. */
+html[data-tm-shape="neo"] :is(.metric,.panel,.task-card,.shift-area,.shift-overview-card,.source-roster-panel,.source-summary-card,.map-crew-card,.rack-person,.shift-manage-panel,.shift-progress,.shift-tab){box-sizing:border-box!important;min-width:0!important;max-width:calc(100% - 8px)!important;margin-right:8px!important}
+html[data-tm-shape="neo"] :is(.metric,.shift-overview-card,.panel,.shift-area,.source-summary-card,.shift-tab)::before{box-sizing:border-box!important;left:12px!important;width:min(34%,145px)!important;max-width:calc(100% - 26px)!important;min-width:0!important}
+html[data-tm-shape="neo"] :is(.shift-area,.metric,.panel,.shift-overview-card)>*{min-width:0}
+@media(max-width:760px){html[data-tm-shape="neo"] :is(.shift-area,.panel,.shift-overview-card,.source-summary-card,.metric){max-width:calc(100% - 8px)!important;margin-left:0!important;margin-right:8px!important}html[data-tm-shape="neo"] .shift-area::before{top:-11px!important;height:10px!important}}
