@@ -551,3 +551,477 @@ html[data-tm-shape="neo"] .shift-layout .shift-side > .panel::before {
 .tm-shift-view-options button.active{background:var(--tm-accent,#3677ed);color:var(--tm-accent-ink,#fff);box-shadow:0 3px 12px var(--tm-glow,#0001)}
 .tm-shift-view-options button:focus-visible{outline:3px solid var(--tm-accent,#3677ed);outline-offset:2px}
 @media(max-width:500px){.tm-my-tasks-toolbar{padding:12px}.tm-shift-view-options{width:100%;display:grid;grid-template-columns:1fr 1fr}.tm-shift-view-options button{min-width:0;padding:9px 6px;font-size:11px}}
+
+
+/* -------------------------------------------------------------
+ TaskMate v23 / POCKET CARDS. Original app skin inspired by the
+ supplied charcoal + playful pastel 2-layer UI reference.
+ Self-contained theme scoped to data-tm-theme=pocket. No database.
+ ------------------------------------------------------------- */
+html[data-tm-theme="pocket"]{
+ --tm-bg:#302e2d;--tm-card:#49413f;--tm-layer:#5a504b;
+ --tm-line:#74655f;--tm-text:#f8f1e9;--tm-muted:#d5c7b9;
+ --tm-accent:#ffd29a;--tm-accent-ink:#302823;--tm-sidebar:#37312f;
+ --tm-highlight:#f3a7ce;--tm-radius:24px;--tm-soft:#66584f;
+ --tm-glow:#14100e65;--tm-banner:linear-gradient(126deg,#514843,#352d2a);
+ --tm-outline:#1e1a19;--tm-hard-shadow:#1d1918;
+ --tm-nav-bg:#3b3533;--tm-nav-text:#c9bdb2;
+ --tm-nav-active:#ffc78d;--tm-nav-active-ink:#2c2421;
+ --pocket-cream:#ffe6bc;--pocket-mint:#87e9bb;
+ --pocket-pink:#f4bbe3;--pocket-lav:#c6b2f3;
+ color-scheme:dark;
+}
+html[data-tm-theme="pocket"] body,
+html[data-tm-theme="pocket"] .app-shell,
+html[data-tm-theme="pocket"] .main{background:#302e2d!important;color:#fff3e7!important}
+html[data-tm-theme="pocket"] .main{min-width:0!important}
+html[data-tm-theme="pocket"] :is(.topbar h1,.section-header h2,.tm-my-tasks-toolbar strong){color:#fff8ee!important}
+html[data-tm-theme="pocket"] :is(.eyebrow,.section-header p,.topbar .date-chip){color:#c8bdb1!important}
+html[data-tm-theme="pocket"] .topbar .chip{background:#514b48!important;color:#fff0de!important;border-color:#6c5d55!important}
+html[data-tm-theme="pocket"] .topbar .avatar{background:#ffd19f!important;color:#342b27!important;border-radius:16px!important}
+html[data-tm-theme="pocket"] .tm-cloud-sync{background:#514844!important;border-color:#87756a!important;color:#fce6c9!important}
+/* Make the high-level surfaces truly different from neofolder style. */
+html[data-tm-theme="pocket"] :is(.metric,.source-summary-card,.shift-overview-card,.task-card,.shift-area,.panel,.shift-manage-panel,.source-roster-panel,.rack-person,.map-crew-card,.tm-my-tasks-toolbar){
+ position:relative!important;box-sizing:border-box!important;min-width:0!important;
+ max-width:100%!important;margin-right:0!important;
+ border-radius:24px!important;border:2px solid #24201e!important;
+ box-shadow:0 8px 0 #1c1918,0 15px 27px #17131244!important;
+}
+/* Disable old outside-tabs and heavy 3D styles regardless of selected shape. */
+html[data-tm-theme="pocket"][data-tm-shape] :is(.metric,.panel,.shift-area,.shift-overview-card,.source-summary-card,.shift-tab)::before,
+html[data-tm-theme="pocket"][data-tm-shape] :is(.metric,.panel,.shift-area,.shift-overview-card,.source-summary-card,.shift-tab)::after,
+html[data-tm-theme="pocket"][data-tm-shape] .shift-layout .shift-area-list>.shift-area::before,
+html[data-tm-theme="pocket"][data-tm-shape] .shift-layout .shift-area-list>.shift-area::after{content:none!important;display:none!important}
+html[data-tm-theme="pocket"][data-tm-shape] .shift-layout .shift-area-list>.shift-area{
+ margin:0 0 15px 0!important;width:100%!important;max-width:100%!important;
+ overflow:hidden!important;border:2px solid #24201e!important;border-radius:24px!important;
+ box-shadow:0 8px 0 #191716,0 15px 24px #15110f40!important
+}
+html[data-tm-theme="pocket"][data-tm-shape] :is(.metric,.panel,.shift-area,.shift-overview-card,.source-summary-card,.shift-tab){margin-top:0!important}
+/* Dashboard cards mimic the reference: dark title rail + rounded pastel body. */
+html[data-tm-theme="pocket"] .source-summary{gap:13px!important;margin:16px 0 25px!important}
+html[data-tm-theme="pocket"] .source-summary-card{
+ background:var(--pocket-cream)!important;color:#342924!important;
+ display:flex!important;flex-direction:column!important;gap:6px!important;
+ padding:0 14px 17px!important;overflow:hidden!important;min-height:165px!important;
+}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(3n+2){background:var(--pocket-mint)!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(3n+3){background:var(--pocket-lav)!important}
+.tm-pocket-summary-head{display:flex;align-items:center;gap:9px}
+.tm-pocket-summary-icon{display:none}
+html[data-tm-theme="pocket"] .tm-pocket-summary-head{
+ background:#5c514c!important;color:#fff4e8!important;
+ padding:14px 13px!important;margin:0 -14px 10px!important;
+ min-height:69px!important;border-radius:20px 20px 16px 16px!important;
+}
+html[data-tm-theme="pocket"] .tm-pocket-summary-icon{
+ display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;
+ font-size:24px;border-radius:13px;background:#ffd39b;
+ border:2px solid #322925;box-shadow:2px 3px 0 #322925;
+}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(2) .tm-pocket-summary-icon{background:#9deecb}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(3) .tm-pocket-summary-icon{background:#dec6ff}
+html[data-tm-theme="pocket"] .source-summary-card strong,
+html[data-tm-theme="pocket"] .source-summary-card strong small{color:#fff1df!important;font-size:14px!important}
+html[data-tm-theme="pocket"] .source-summary-card>span,
+html[data-tm-theme="pocket"] .source-summary-card>small{color:#574b42!important}
+html[data-tm-theme="pocket"] .source-summary-card>b{color:#2d2623!important;font-size:24px!important;letter-spacing:-.6px}
+/* Card metrics: picture/icon on left, title immediately beside it. */
+html[data-tm-theme="pocket"] .metrics{gap:14px!important;margin-top:20px!important}
+html[data-tm-theme="pocket"] .metric{
+ background:#ffe0b0!important;color:#332924!important;
+ padding:16px 14px 18px!important;min-height:148px!important;overflow:hidden!important;
+}
+html[data-tm-theme="pocket"] .metric:nth-child(4n+2){background:var(--pocket-mint)!important}
+html[data-tm-theme="pocket"] .metric:nth-child(4n+3){background:var(--pocket-pink)!important}
+html[data-tm-theme="pocket"] .metric:nth-child(4n){background:var(--pocket-lav)!important}
+html[data-tm-theme="pocket"] .metric-top{flex-direction:row-reverse!important;justify-content:flex-end!important;gap:10px!important;align-items:center!important}
+html[data-tm-theme="pocket"] .metric-icon,
+html[data-tm-theme="pocket"] .metric-icon.green,
+html[data-tm-theme="pocket"] .metric-icon.amber,
+html[data-tm-theme="pocket"] .metric-icon.red{
+ flex:0 0 43px!important;width:43px!important;height:43px!important;
+ border:2px solid #3d302b!important;border-radius:14px!important;
+ background:#ffeecf!important;color:#342b24!important;
+ box-shadow:2px 3px 0 #332a26!important;font-size:23px!important
+}
+html[data-tm-theme="pocket"] .metric:nth-child(4n+2) .metric-icon{background:#b3f5d4!important}
+html[data-tm-theme="pocket"] .metric:nth-child(4n+3) .metric-icon{background:#ffd7ed!important}
+html[data-tm-theme="pocket"] .metric:nth-child(4n) .metric-icon{background:#e3d0ff!important}
+html[data-tm-theme="pocket"] .metric-label{font-size:12px!important;line-height:1.3!important;color:#332722!important;font-weight:900!important}
+html[data-tm-theme="pocket"] .metric strong{font-size:30px!important;color:#282320!important;margin-top:15px!important}
+html[data-tm-theme="pocket"] .metric-foot{color:#5f5048!important;font-size:11px!important}
+/* Shift card: warm charcoal title rail, icon LEFT, text RIGHT, pastel tasks. */
+html[data-tm-theme="pocket"] .shift-area{
+ background:#ffe7c3!important;color:#2c2420!important;overflow:hidden!important;
+}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+2){background:#c4f1d5!important}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+3){background:#f5cbe8!important}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+4){background:#dfd0ff!important}
+html[data-tm-theme="pocket"][data-tm-shape] .shift-layout .shift-area-list>.shift-area>.shift-area-head{
+ background:#584e49!important;color:#fff4e8!important;border-radius:20px 20px 15px 15px!important;
+ border:0!important;padding:17px 16px!important;min-height:79px!important;
+}
+html[data-tm-theme="pocket"][data-tm-shape] .shift-layout .shift-area-list>.shift-area>.shift-area-head::before{content:none!important;display:none!important}
+html[data-tm-theme="pocket"] .shift-area-head h3{color:#fff5e8!important;font-size:17px!important;font-weight:850!important}
+html[data-tm-theme="pocket"] .shift-area-head span{color:#ddcec1!important}
+html[data-tm-theme="pocket"] .shift-area-head>b{color:#ffd295!important;font-size:13px!important}
+html[data-tm-theme="pocket"] .shift-area-icon{
+ width:47px!important;height:47px!important;flex:0 0 47px!important;
+ background:#ffd9a0!important;color:#3f302a!important;border-radius:15px!important;
+ border:2px solid #292320!important;box-shadow:3px 4px 0 #27211f!important;font-size:24px!important;
+}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+2) .shift-area-icon{background:#a4f0be!important}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+3) .shift-area-icon{background:#ffcae6!important}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+4) .shift-area-icon{background:#d5c1fb!important}
+html[data-tm-theme="pocket"] .shift-item{background:transparent!important;border-color:#4a373323!important;padding:15px 16px!important}
+html[data-tm-theme="pocket"] .shift-item.complete{background:#ffffff45!important}
+html[data-tm-theme="pocket"] .shift-item-text strong{color:#342820!important;font-size:13px!important}
+html[data-tm-theme="pocket"] .shift-item.complete .shift-item-text strong{color:#1f765e!important}
+html[data-tm-theme="pocket"] :is(.shift-item-text p,.shift-item-text small,.shift-item-footer){color:#5c4b41!important}
+html[data-tm-theme="pocket"] .shift-upload{background:#fff6e6!important;border:1.5px dashed #705546!important;color:#3c302b!important;border-radius:13px!important;font-weight:900!important;max-width:100%!important}
+html[data-tm-theme="pocket"] .shift-upload.disabled{opacity:.5!important}
+html[data-tm-theme="pocket"] .shift-item-main>input{accent-color:#494039!important}
+html[data-tm-theme="pocket"] .tm-pic-indicator{color:#51433b!important}
+/* Header, navigation, actions, input and sidebar components. */
+html[data-tm-theme="pocket"] :is(.panel,.tm-my-tasks-toolbar,.shift-manage-panel,.source-roster-panel){
+ background:#4b4340!important;color:#fff0de!important;border-color:#827164!important;
+}
+html[data-tm-theme="pocket"] :is(.panel h2,.panel h3,.panel h4,.panel strong,.tm-my-tasks-toolbar small){color:#fff1dd!important}
+html[data-tm-theme="pocket"] .panel p{color:#e0d0c1!important}
+html[data-tm-theme="pocket"] .shift-hero,html[data-tm-theme="pocket"] .welcome{
+ background:linear-gradient(125deg,#66584f,#4f4542)!important;border:2px solid #231f1c!important;
+ color:#fff0e1!important;box-shadow:0 8px 0 #1c1918!important;border-radius:24px!important
+}
+html[data-tm-theme="pocket"] :is(.welcome h2,.shift-hero h2,.welcome p,.shift-hero p){color:#fff0e3!important}
+html[data-tm-theme="pocket"] .shift-status{background:#ffdeb0!important;color:#382a24!important}
+html[data-tm-theme="pocket"] .shift-hero-score{border-color:#c6ad97!important}
+html[data-tm-theme="pocket"] :is(.shift-tabs,.shift-overview,.shift-summary-list,.shift-layout){min-width:0!important}
+html[data-tm-theme="pocket"] .shift-tab,
+html[data-tm-theme="pocket"] .shift-tab.active{
+ min-width:0!important;max-width:100%!important;margin:0!important;
+ background:#564c46!important;border:2px solid #1f1b19!important;border-radius:17px!important;
+ color:#f7e8db!important;box-shadow:0 4px 0 #1a1716!important;padding:12px!important;
+}
+html[data-tm-theme="pocket"] .shift-tab.active{background:#ffd69f!important;color:#2a2421!important}
+html[data-tm-theme="pocket"] .shift-tab b{background:#fff0dc40!important;color:inherit!important}
+html[data-tm-theme="pocket"] .shift-tab.active b{background:#ffffff90!important}
+html[data-tm-theme="pocket"] .shift-overview-card{
+ background:#f0bddf!important;color:#31252a!important;border-radius:24px!important;
+}
+html[data-tm-theme="pocket"] .shift-overview-card:nth-child(2){background:#a8edd0!important}
+html[data-tm-theme="pocket"] .shift-overview-card:nth-child(3){background:#e2cbff!important}
+html[data-tm-theme="pocket"] :is(.shift-overview-title strong,.shift-overview-big){color:#2d2724!important}
+html[data-tm-theme="pocket"] :is(.shift-overview-title span,.shift-overview-card>p){color:#65534c!important}
+html[data-tm-theme="pocket"] .shift-progress-track{background:#3b292926!important}
+html[data-tm-theme="pocket"] .shift-progress-track>span{background:#594c45!important}
+html[data-tm-theme="pocket"] .task-card{
+ background:#ffdca8!important;color:#302722!important;padding:16px!important;
+}
+html[data-tm-theme="pocket"] .task-card:nth-child(3n+2){background:#abedd3!important}
+html[data-tm-theme="pocket"] .task-card:nth-child(3n){background:#dec1f3!important}
+html[data-tm-theme="pocket"] .task-title{color:#2c2522!important}
+html[data-tm-theme="pocket"] .task-sub{color:#61534b!important}
+html[data-tm-theme="pocket"] .task-tick{background:#fff0d3!important;border:2px solid #493b32!important;box-shadow:2px 2px 0 #493b32!important;color:#342d28!important;border-radius:13px!important}
+html[data-tm-theme="pocket"] .task-tick.done{background:#90eab4!important}
+html[data-tm-theme="pocket"] .btn.primary,html[data-tm-theme="pocket"] .floating{
+ background:#ffce95!important;color:#352c25!important;border:2px solid #271f1d!important;
+ border-radius:16px!important;box-shadow:2px 4px 0 #201b18!important;
+}
+html[data-tm-theme="pocket"] .btn.outline,html[data-tm-theme="pocket"] .btn.ghost,
+html[data-tm-theme="pocket"] .btn.soft{background:#ead6c5!important;color:#342721!important;border:1px solid #836b5c!important;border-radius:13px!important}
+html[data-tm-theme="pocket"] :is(.field,.search,.filter-row select,.shift-datebar input){background:#f9e9d6!important;color:#352923!important;border-color:#ad9180!important;border-radius:13px!important;color-scheme:light!important}
+html[data-tm-theme="pocket"] .field::placeholder{color:#807269!important}
+html[data-tm-theme="pocket"] :is(.rack-panel,.rack-person,.map-crew-card,.rack-directory,.tm-schedule-content){background:#fff0d7!important;color:#332923!important;border-radius:18px!important}
+html[data-tm-theme="pocket"] :is(.rack-person-head,.rack-photo-row,.map-crew-content,.rack-head,.rack-photo-top){color:#322b25!important}
+html[data-tm-theme="pocket"] :is(.rack-photo-row,.rack-person-head,.rack-row,.rack-directory-row){border-color:#ddbb9d!important}
+html[data-tm-theme="pocket"] :is(.shift-summary-head,.shift-summary-row,.settings-item,.person-row,.shift-roster-row){border-color:#9a817050!important}
+html[data-tm-theme="pocket"] .tm-theme-settings{background:#4a4240!important}
+html[data-tm-theme="pocket"] .tm-theme-option{background:#f7e6d4!important;border-color:#6f6058!important}
+html[data-tm-theme="pocket"] .tm-theme-option.selected{border-color:#ffe0b1!important;box-shadow:0 0 0 2px #ffca8a!important}
+html[data-tm-theme="pocket"] .tm-theme-option-title{color:#332823!important}
+html[data-tm-theme="pocket"] .tm-theme-option-desc{color:#6e6258!important}
+html[data-tm-theme="pocket"] .tm-theme-header p{color:#e3d5c8!important}
+html[data-tm-theme="pocket"] .tm-shape-option{background:#eee0d0!important;color:#3a2c25!important}
+html[data-tm-theme="pocket"] .tm-shape-option b{color:#302822!important}
+html[data-tm-theme="pocket"] .tm-shape-option small{color:#645850!important}
+/* Bottom rail similar to original reference's floating charcoal navigation. */
+html[data-tm-theme="pocket"] .bottom-nav{
+ background:#3f3835!important;border:2px solid #201c1a!important;
+ border-bottom:none!important;border-radius:27px 27px 0 0!important;
+ box-shadow:0 -7px 20px #17131270!important;
+ padding:9px 7px calc(11px + env(safe-area-inset-bottom))!important;
+}
+html[data-tm-theme="pocket"] .bottom-nav>button,
+html[data-tm-theme="pocket"] .bottom-nav>button.active{
+ color:#cfc0b2!important;background:transparent!important;border:0!important;box-shadow:none!important;
+}
+html[data-tm-theme="pocket"] .bottom-nav>button>.ico{
+ width:37px!important;height:35px!important;border-radius:13px!important;
+ color:#2e2522!important;background:#d6c7b8!important;
+ box-shadow:inset 0 0 0 1.5px #312824!important;
+}
+html[data-tm-theme="pocket"] .bottom-nav>button:nth-child(2)>.ico{background:#b2ecd4!important}
+html[data-tm-theme="pocket"] .bottom-nav>button:nth-child(3)>.ico{background:#f8bfe0!important}
+html[data-tm-theme="pocket"] .bottom-nav>button:nth-child(4)>.ico{background:#d7c4ff!important}
+html[data-tm-theme="pocket"] .bottom-nav>button:nth-child(5)>.ico{background:#b8e8f1!important}
+html[data-tm-theme="pocket"] .bottom-nav>button:nth-child(6)>.ico{background:#ffdda2!important}
+html[data-tm-theme="pocket"] .bottom-nav>button.active>.ico{
+ box-shadow:0 0 0 2px #fff1d9,3px 4px 0 #191513!important;
+ transform:translateY(-2px)!important;color:#261f1c!important;
+}
+html[data-tm-theme="pocket"] .bottom-nav>button.active>span:last-child{color:#ffe2b7!important;font-weight:950!important}
+html[data-tm-theme="pocket"] .tm-my-tasks-toolbar{background:#544a45!important;color:#fff0e0!important}
+html[data-tm-theme="pocket"] .tm-my-tasks-toolbar small{color:#e4ccba!important}
+html[data-tm-theme="pocket"] .tm-shift-view-options{background:#3d332f!important;border-color:#776051!important}
+html[data-tm-theme="pocket"] .tm-shift-view-options button.active{background:#ffce98!important;color:#2f2721!important}
+html[data-tm-theme="pocket"] .tm-shift-view-options button{color:#ffe2c1}
+/* Desktop layout keeps the same visual treatment. Tablet and mobile are strictly bounded. */
+@media(max-width:760px){
+ html[data-tm-theme="pocket"] .main{padding-left:16px!important;padding-right:16px!important}
+ html[data-tm-theme="pocket"] .source-summary{grid-template-columns:1fr 1fr!important}
+ html[data-tm-theme="pocket"] .source-summary-card{min-width:0!important}
+ html[data-tm-theme="pocket"] .source-summary-card:last-child:nth-child(odd){grid-column:1/-1}
+ html[data-tm-theme="pocket"] .metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+ html[data-tm-theme="pocket"] .metric{min-width:0!important;padding:13px 10px!important}
+ html[data-tm-theme="pocket"] .metric-top{gap:7px!important}
+ html[data-tm-theme="pocket"] .metric-icon{flex-basis:37px!important;width:37px!important;height:37px!important;font-size:18px!important}
+ html[data-tm-theme="pocket"] .metric-label{font-size:11px!important}
+ html[data-tm-theme="pocket"] .shift-layout .shift-area-list>.shift-area{margin:0 0 15px!important;width:100%!important;max-width:100%!important}
+ html[data-tm-theme="pocket"] .bottom-nav{gap:0!important;grid-template-columns:repeat(6,minmax(0,1fr))!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button>span:last-child{font-size:9px!important}
+}
+@media(max-width:395px){
+ html[data-tm-theme="pocket"] .source-summary{grid-template-columns:1fr!important}
+ html[data-tm-theme="pocket"] .source-summary-card:last-child:nth-child(odd){grid-column:auto}
+}
+@media(prefers-reduced-motion:reduce){html[data-tm-theme="pocket"] *{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
+
+
+/* =========================================================
+ v24 — Pocket Wallet, reference-fidelity compact layered cards.
+ Only applies to Pocket (per-user local). Other themes untouched.
+ ========================================================= */
+.tm-pk-trend,.tm-pk-belly,.tm-pk-extra{display:none}
+html[data-tm-theme="pocket"]{--tm-nav-bg:#333231!important;--tm-nav-text:#ebdbcd!important;color-scheme:dark}
+html[data-tm-theme="pocket"] body,
+html[data-tm-theme="pocket"] .app-shell,
+html[data-tm-theme="pocket"] .main{background:#30302e!important}
+/* Actual progress graph above the wallet cards. Values come from checklist state. */
+html[data-tm-theme="pocket"] .tm-pk-trend{display:block;background:#353532;border-radius:25px;padding:20px 16px 13px;margin:18px 0 21px;border:1px solid #45433e}
+html[data-tm-theme="pocket"] .tm-pk-trend-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+html[data-tm-theme="pocket"] .tm-pk-trend-title strong{color:#fff6e8;font-size:18px;letter-spacing:-.4px}
+html[data-tm-theme="pocket"] .tm-pk-trend-title span{color:#c8b9ab;font-size:9px;font-weight:800;letter-spacing:1px}
+html[data-tm-theme="pocket"] .tm-pk-trend-legend{display:flex;gap:18px;background:#292a29;padding:9px 13px;margin:15px 0 9px;border-radius:12px;color:#eac8bb;font-size:11px}
+html[data-tm-theme="pocket"] .tm-pk-trend-legend span:last-child{color:#afa8a1}
+html[data-tm-theme="pocket"] .tm-pk-trend svg{display:block;width:100%;height:113px}
+/* Two-column pocket cards, like the screenshot, not the oversized v23 panels. */
+html[data-tm-theme="pocket"] .source-summary{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:15px 12px!important;margin:20px 0 28px!important}
+html[data-tm-theme="pocket"] .source-summary-card,
+html[data-tm-theme="pocket"][data-tm-shape] .source-summary-card{
+ position:relative!important;display:block!important;
+ min-height:131px!important;height:131px!important;max-height:131px!important;
+ padding:0!important;margin:0!important;max-width:100%!important;
+ border:0!important;border-radius:24px!important;overflow:hidden!important;
+ background:#575148!important;box-shadow:0 5px 0 #242422!important;
+ box-sizing:border-box!important
+}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+2){background:#53534f!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+3){background:#564959!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n){background:#39564d!important}
+html[data-tm-theme="pocket"] .source-summary-card:last-child:nth-child(odd){grid-column:auto!important}
+html[data-tm-theme="pocket"] .source-summary-card>.tm-pocket-summary-head{
+ position:absolute!important;left:12px!important;right:6px!important;top:9px!important;
+ display:flex!important;align-items:center!important;gap:8px!important;z-index:2!important;
+ background:transparent!important;padding:0!important;margin:0!important;
+ border:0!important;min-height:38px!important;height:42px!important;border-radius:0!important
+}
+html[data-tm-theme="pocket"] .source-summary-card .tm-pocket-summary-icon{
+ display:grid!important;place-items:center!important;flex:0 0 49px!important;
+ width:49px!important;height:49px!important;border:0!important;border-radius:16px!important;
+ background:#ffd297!important;box-shadow:none!important;font-size:28px!important;
+ transform:translateY(4px)!important;line-height:1!important
+}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+2) .tm-pocket-summary-icon{background:#ffd8aa!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+3) .tm-pocket-summary-icon{background:#dca8ea!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n) .tm-pocket-summary-icon{background:#78e8ad!important}
+html[data-tm-theme="pocket"] .tm-pocket-summary-head>strong,
+html[data-tm-theme="pocket"] .tm-pocket-summary-head>strong small{
+ font-size:14px!important;white-space:nowrap!important;overflow:hidden!important;
+ text-overflow:ellipsis!important;color:#fff3e7!important;line-height:1.15!important
+}
+html[data-tm-theme="pocket"] .tm-pocket-summary-head>strong{max-width:calc(100% - 58px);display:flex!important;flex-direction:column!important;gap:2px!important}
+html[data-tm-theme="pocket"] .tm-pocket-summary-head>strong small{font-size:9px!important;color:#dbcec3!important}
+html[data-tm-theme="pocket"] .source-summary-card>span,
+html[data-tm-theme="pocket"] .source-summary-card>b,
+html[data-tm-theme="pocket"] .source-summary-card>small{display:none!important}
+html[data-tm-theme="pocket"] .source-summary-card .tm-pk-belly{
+ display:flex!important;flex-direction:column!important;justify-content:flex-end!important;
+ position:absolute!important;left:9px!important;right:9px!important;top:49px!important;bottom:8px!important;
+ padding:26px 12px 8px!important;border-radius:18px!important;
+ color:#292724!important;background:#ffd795!important;z-index:1!important;box-sizing:border-box!important
+}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+2) .tm-pk-belly{background:#ffdaaa!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+3) .tm-pk-belly{background:#e4b8ec!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n) .tm-pk-belly{background:#73e8ad!important}
+html[data-tm-theme="pocket"] .tm-pk-belly::before{content:"";position:absolute;left:0;top:-1px;width:58px;height:19px;border-radius:0 0 18px 0;background:#575148}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+2) .tm-pk-belly::before{background:#53534f}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+3) .tm-pk-belly::before{background:#564959}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n) .tm-pk-belly::before{background:#39564d}
+html[data-tm-theme="pocket"] .tm-pk-belly b{position:relative;z-index:1;font-size:16px!important;color:#342b24!important;font-weight:950!important;letter-spacing:-.3px;line-height:1.05;margin:0 0 3px 0!important}
+html[data-tm-theme="pocket"] .tm-pk-belly small{position:relative;color:#685441!important;font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html[data-tm-theme="pocket"] .tm-pk-pips{position:absolute;right:10px;top:13px;display:flex;gap:3px}
+html[data-tm-theme="pocket"] .tm-pk-pips i{display:block;width:10px;height:13px;background:#cda971;border-radius:3px;opacity:.9}
+html[data-tm-theme="pocket"] .tm-pk-stars{position:absolute;right:10px;bottom:8px;font-size:8px;letter-spacing:2px;color:#7d6c55}
+html[data-tm-theme="pocket"] .tm-pk-extra{display:block}
+/* Metrics share the tiny wallet identity rather than giant blocks. */
+html[data-tm-theme="pocket"] .metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+html[data-tm-theme="pocket"] .metric{min-height:127px!important;padding:12px 12px 9px!important;border:0!important;border-radius:20px!important;box-shadow:0 5px 0 #232321!important}
+html[data-tm-theme="pocket"] .metric-top{gap:7px!important}
+html[data-tm-theme="pocket"] .metric-icon{width:39px!important;height:39px!important;flex-basis:39px!important;box-shadow:none!important;border:0!important;border-radius:13px!important}
+html[data-tm-theme="pocket"] .metric-label{font-size:11px!important}
+html[data-tm-theme="pocket"] .metric strong{font-size:23px!important;margin:7px 0 0!important;line-height:1.1!important}
+html[data-tm-theme="pocket"] .metric-foot{font-size:9px!important}
+/* The Shift cards also use inset body pastel and icon beside title. */
+html[data-tm-theme="pocket"][data-tm-shape] .shift-layout .shift-area-list>.shift-area{background:#544e47!important;box-shadow:0 5px 0 #211f1d!important;border:0!important;max-width:100%!important;border-radius:23px!important;padding:8px!important;overflow:hidden!important}
+html[data-tm-theme="pocket"][data-tm-shape] .shift-layout .shift-area-list>.shift-area>.shift-area-head{background:transparent!important;height:60px!important;min-height:60px!important;padding:8px 10px 10px!important;border-radius:0!important}
+html[data-tm-theme="pocket"] .shift-area-icon{width:48px!important;height:48px!important;flex-basis:48px!important;box-shadow:none!important;border:0!important;border-radius:14px!important;font-size:25px!important}
+html[data-tm-theme="pocket"] .shift-area-head h3{font-size:15px!important}
+html[data-tm-theme="pocket"] .shift-area-head span{color:#e4d3c5!important}
+html[data-tm-theme="pocket"] .shift-area>.shift-item{background:#ffe0b2!important;margin:0!important;border:0!important;border-bottom:1px solid #bca37e!important;padding:15px 13px!important}
+html[data-tm-theme="pocket"] .shift-area>.shift-item:nth-child(2){border-radius:17px 17px 0 0!important}
+html[data-tm-theme="pocket"] .shift-area>.shift-item:last-child{border-radius:0 0 16px 16px!important;border-bottom:0!important}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+2)>.shift-item{background:#a8f0cf!important}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+3)>.shift-item{background:#e9c4f2!important}
+html[data-tm-theme="pocket"] .shift-area:nth-child(4n+4)>.shift-item{background:#b9dcef!important}
+/* Floating navigation in the screenshot, illustrated pastel icons, active identity. */
+@media(max-width:760px){
+ html[data-tm-theme="pocket"] .bottom-nav{left:9px!important;right:9px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;padding:9px 6px 7px!important;background:#3b3a37!important;border:1px solid #524e48!important;border-radius:26px!important;box-shadow:0 -5px 19px #1a1a1944!important;min-height:72px!important;gap:1px!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button>.ico{width:40px!important;height:40px!important;flex-basis:40px!important;border-radius:13px!important;box-shadow:0 3px 0 #272624!important;color:#302927!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button>.ico svg{width:21px!important;height:21px!important;stroke-width:2.25!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button.active>.ico{outline:2px solid #fff3d7!important;outline-offset:2px!important;box-shadow:0 3px 0 #272624!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button>span:last-child{font-size:8px!important;color:#e8d9c7!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button.active>span:last-child{color:#ffe6c0!important}
+}
+@media(max-width:370px){html[data-tm-theme="pocket"] .source-summary-card{height:124px!important;min-height:124px!important}}
+
+
+/* TaskMate v25 · wallet-reference refinements (scoped solely to Pocket theme) */
+.tm-pocket-nav-art{display:none}
+html[data-tm-theme="pocket"] body,html[data-tm-theme="pocket"] .main{background:#2e2e2c!important}
+html[data-tm-theme="pocket"] .tm-pk-trend{border:0!important;border-radius:29px!important;background:#373734!important;padding:17px 15px 14px!important;margin-top:14px!important}
+html[data-tm-theme="pocket"] .tm-pk-trend-legend{border-radius:14px!important;gap:12px!important}
+html[data-tm-theme="pocket"] .source-summary{gap:14px 12px!important;margin:16px 0 26px!important}
+html[data-tm-theme="pocket"] .source-summary-card,
+html[data-tm-theme="pocket"][data-tm-shape] .source-summary-card{
+ height:125px!important;min-height:125px!important;max-height:125px!important;
+ border-radius:23px!important;background:#514a43!important;
+ box-shadow:0 5px 0 rgba(23,21,19,.9),0 0 0 1px #70675c30!important;
+ overflow:hidden!important;
+}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+2){background:#4f4945!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+3){background:#574b57!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n){background:#39584d!important}
+html[data-tm-theme="pocket"] .source-summary-card>.tm-pocket-summary-head{
+ left:10px!important;right:8px!important;top:8px!important;height:52px!important;min-height:52px!important;
+ display:flex!important;gap:8px!important;align-items:flex-start!important;
+}
+html[data-tm-theme="pocket"] .source-summary-card .tm-pocket-summary-icon{
+ width:49px!important;height:49px!important;flex:0 0 49px!important;
+ background:#f6cc86!important;border-radius:16px!important;
+ box-shadow:0 2px 0 rgba(31,26,21,.28)!important;
+ transform:translateY(0)!important;z-index:3!important;
+}
+html[data-tm-theme="pocket"] .tm-pocket-illustration{display:block;width:37px;height:37px;max-width:100%}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+2) .tm-pocket-summary-icon{background:#ffd6a4!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+3) .tm-pocket-summary-icon{background:#e3b1f0!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n) .tm-pocket-summary-icon{background:#78e2b0!important}
+html[data-tm-theme="pocket"] .tm-pocket-summary-head>strong{
+ margin-top:5px!important;max-width:calc(100% - 58px);font-size:13px!important;
+ color:#f7efe8!important;line-height:1.14!important;text-shadow:0 1px 1px #0003;
+}
+html[data-tm-theme="pocket"] .source-summary-card .tm-pk-belly{
+ left:9px!important;right:9px!important;top:53px!important;bottom:9px!important;
+ padding:24px 10px 6px!important;border-radius:10px 21px 16px 16px!important;
+ background:#ffda9d!important;
+}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+2) .tm-pk-belly{background:#ffda9b!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+3) .tm-pk-belly{background:#eebceb!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n) .tm-pk-belly{background:#80e6b4!important}
+/* The top-left 'cut' is the characteristic wallet/pocket curve. */
+html[data-tm-theme="pocket"] .tm-pk-belly::before{
+ width:61px!important;height:18px!important;left:0!important;top:-1px!important;
+ border-radius:0 0 20px 0!important;background:#514a43!important;
+}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+2) .tm-pk-belly::before{background:#4f4945!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n+3) .tm-pk-belly::before{background:#574b57!important}
+html[data-tm-theme="pocket"] .source-summary-card:nth-child(4n) .tm-pk-belly::before{background:#39584d!important}
+html[data-tm-theme="pocket"] .tm-pk-belly b{font-size:15px!important;line-height:1.03!important;font-weight:900!important}
+html[data-tm-theme="pocket"] .tm-pk-belly small{font-size:9px!important;font-weight:650!important}
+html[data-tm-theme="pocket"] .tm-pk-pips{top:10px!important;right:8px!important;gap:2px!important}
+html[data-tm-theme="pocket"] .tm-pk-pips i{
+ width:8px!important;height:12px!important;background:#d5af75!important;opacity:.76!important;
+}
+html[data-tm-theme="pocket"] .tm-pk-stars{font-size:7px!important;bottom:7px!important;right:8px!important;opacity:.8}
+/* Shift task containers share the same softer wallet treatment, without protruding tabs. */
+html[data-tm-theme="pocket"] .shift-layout .shift-area-list>.shift-area,
+html[data-tm-theme="pocket"][data-tm-shape] .shift-layout .shift-area-list>.shift-area{
+ border-radius:24px!important;background:#504941!important;padding:7px!important;
+ box-shadow:0 4px 0 #191817!important;overflow:hidden!important;
+}
+html[data-tm-theme="pocket"] .shift-layout .shift-area-list>.shift-area::before{display:none!important}
+html[data-tm-theme="pocket"] .shift-area-head{border:0!important}
+html[data-tm-theme="pocket"] .shift-area-head h3{font-size:15px!important;letter-spacing:-.3px!important}
+html[data-tm-theme="pocket"] .shift-area>.shift-item{border-color:#cab58f!important}
+html[data-tm-theme="pocket"] .shift-area .shift-item-footer{min-width:0!important;flex-wrap:wrap!important}
+html[data-tm-theme="pocket"] .shift-upload{color:#413227!important;border:1.5px dashed #856d54!important;background:#fff2d9!important}
+/* Nav reference: dark floating tray, bright illustrated buttons, selected pill with icon and title beside each other. */
+@media(max-width:760px){
+ html[data-tm-theme="pocket"] .bottom-nav{
+   display:flex!important;align-items:center!important;justify-content:space-between!important;
+   gap:3px!important;min-height:72px!important;
+   padding:7px 7px calc(6px + env(safe-area-inset-bottom))!important;
+   border-radius:24px 24px 0 0!important;bottom:0!important;left:0!important;right:0!important;
+   border:1px solid #55504b!important;background:#3e3b37!important;
+   box-shadow:0 -8px 25px #12111070!important;
+ }
+ html[data-tm-theme="pocket"] .bottom-nav>button,
+ html[data-tm-theme="pocket"] .bottom-nav>button.active{
+   display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;
+   gap:5px!important;flex:0 1 39px!important;min-width:0!important;max-width:none!important;
+   padding:3px!important;height:51px!important;min-height:51px!important;
+   background:transparent!important;border-radius:16px!important;
+ }
+ html[data-tm-theme="pocket"] .bottom-nav>button.active{
+   flex:1.45 1 94px!important;background:#5d987f!important;
+   padding:4px 7px!important;border-radius:17px!important;box-shadow:0 3px 0 #272825!important;
+ }
+ html[data-tm-theme="pocket"] .bottom-nav>button>.ico{
+   width:37px!important;height:37px!important;flex:0 0 37px!important;
+   display:grid!important;place-items:center!important;border-radius:13px!important;
+   background:#e5c49b!important;box-shadow:0 2px 0 #252322!important;
+ }
+ html[data-tm-theme="pocket"] .bottom-nav>button>.ico>svg{display:none!important}
+ html[data-tm-theme="pocket"] .bottom-nav .tm-pocket-nav-art{display:block!important}
+ html[data-tm-theme="pocket"] .bottom-nav .tm-pocket-nav-art .tm-pocket-illustration{
+   width:28px!important;height:28px!important;display:block!important;
+ }
+ html[data-tm-theme="pocket"] .bottom-nav>button.active>.ico{
+   width:43px!important;height:43px!important;flex:0 0 43px!important;background:#77ddb3!important;
+   border:0!important;outline:0!important;box-shadow:0 2px 0 #252322!important;
+ }
+ html[data-tm-theme="pocket"] .bottom-nav>button>span:last-child{display:none!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button.active>span:last-child{
+   display:block!important;width:auto!important;color:#fff9e9!important;
+   font-size:10px!important;line-height:1.1!important;white-space:nowrap!important;
+ }
+ html[data-tm-theme="pocket"] .main{padding-bottom:calc(117px + env(safe-area-inset-bottom))!important}
+}
+@media(max-width:375px){
+ html[data-tm-theme="pocket"] .bottom-nav>button,
+ html[data-tm-theme="pocket"] .bottom-nav>button.active{flex-basis:31px!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button>.ico{width:31px!important;flex-basis:31px!important;height:33px!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button.active{flex-basis:95px!important}
+ html[data-tm-theme="pocket"] .bottom-nav>button.active>.ico{width:38px!important;flex-basis:38px!important;height:38px!important}
+ html[data-tm-theme="pocket"] .bottom-nav .tm-pocket-nav-art .tm-pocket-illustration{width:24px!important;height:24px!important}
+}
