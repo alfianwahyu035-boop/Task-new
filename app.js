@@ -299,7 +299,7 @@ function photoReportPanel(){
    <div class="photo-report-info"><span class="photo-report-type">${esc(row.type)}</span><strong>${esc(row.title)}</strong>
    <small>${esc(row.name)} · Shift ${row.shift}</small><small>📷 Diambil: ${esc(photoReportClock(row.capturedAt))}</small>
    <small>☁ Diterima: ${esc(photoReportClock(row.receivedAt))}</small>
-   ${row.aiStatus?`<small>AI rak: ${esc(row.aiStatus)}</small>`:''}
+
    <button type="button" class="btn outline sm" data-action="photo-report-open" data-id="${esc(row.id)}">Lihat foto</button></div>
   </article>`).join('')}</div>`}
   <p class="photo-report-foot">Foto asli tetap tersimpan di bucket privat Supabase. Galeri memakai link sementara; PDF diunduh ke perangkat, tidak disimpan kembali ke cloud. Total foto pada tanggal ini: ${all}.</p>
@@ -312,7 +312,7 @@ async function loadPhotoReport(){
  state.photoReportBusy=true;state.photoReportError='';state.photoReportLoaded=false;render();
  try{
   const [rack, maps, logs, assignments]=await Promise.all([
-   db.from('shift_rack_photos').select('id,workspace_id,work_date,shift_number,assignment_id,user_id,uploaded_by,object_path,client_captured_at,server_received_at,created_at,ai_status').eq('workspace_id',wid).eq('work_date',day).order('created_at',{ascending:false}).limit(1000),
+   db.from('shift_rack_photos').select('id,workspace_id,work_date,shift_number,assignment_id,user_id,uploaded_by,object_path,client_captured_at,server_received_at,created_at').eq('workspace_id',wid).eq('work_date',day).order('created_at',{ascending:false}).limit(1000),
    db.from('shift_map_photos').select('id,workspace_id,work_date,shift_number,user_id,uploaded_by,rack_note,object_path,client_captured_at,server_received_at,created_at').eq('workspace_id',wid).eq('work_date',day).order('created_at',{ascending:false}).limit(1000),
    db.from('shift_logs').select('id,workspace_id,work_date,shift_number,item_key,completed_by').eq('workspace_id',wid).eq('work_date',day).limit(1000),
    db.from('shift_rack_assignments').select('id,user_id,rack_name').eq('workspace_id',wid).limit(1000)
@@ -330,7 +330,7 @@ async function loadPhotoReport(){
   const rows=[];
   for(const p of rack.data||[])rows.push({id:'rack:'+p.id,kind:'rack',type:'Sisir Harga',title:'Rak '+(rackNames.get(p.assignment_id)||'Kode rak tidak diketahui'),
    userId:p.user_id,name:photoReportPicName(p.user_id),shift:p.shift_number,bucket:'shift-extra-evidence',path:p.object_path,
-   capturedAt:p.client_captured_at,receivedAt:p.server_received_at||p.created_at,aiStatus:p.ai_status,signedUrl:''});
+   capturedAt:p.client_captured_at,receivedAt:p.server_received_at||p.created_at,signedUrl:''});
   for(const p of maps.data||[])rows.push({id:'map:'+p.id,kind:'map',type:'Map Do It',title:p.rack_note||'Foto display',
    userId:p.user_id,name:photoReportPicName(p.user_id),shift:p.shift_number,bucket:'shift-extra-evidence',path:p.object_path,
    capturedAt:p.client_captured_at,receivedAt:p.server_received_at||p.created_at,signedUrl:''});
@@ -403,7 +403,6 @@ async function exportPhotoReportPdf(){
   pdf.text('PIC: '+item.name,margin,54);
   pdf.text('Diambil: '+photoReportClock(item.capturedAt),margin,61);
   pdf.text('Diterima server: '+photoReportClock(item.receivedAt),margin,68);
-  if(item.aiStatus)pdf.text('Status AI: '+item.aiStatus,margin,75);
   let imageY=82;
   try{
    const res=await state.db.storage.from(item.bucket).createSignedUrl(item.path,120);
@@ -928,7 +927,6 @@ document.addEventListener('click',async e=>{
  else if(a==='shift-prev'||a==='shift-next'){const d=new Date(state.shiftDate+'T12:00:00');d.setDate(d.getDate()+(a==='shift-next'?1:-1));state.shiftDate=localDay(d);state.shiftView='mine';await loadShiftCloud();render()}
  else if(a==='shift-open-proof'){await openShiftProof(id)}
  else if(a==='extra-open'){await openExtraProof(target.dataset.kind,id)}
- else if(a==='retry-rack-ai'){await analyseRackPhoto(id)}
  else if(a==='shift-remove-roster'){await removeShiftRoster(id)}
  else if(a==='enable-push'){await enableShiftPush()}
  else if(a==='shift-test-alarm'){await testAlarm()}
@@ -954,7 +952,6 @@ document.addEventListener('change',async e=>{
  else if(e.target.dataset.action==='toggle-check'){await toggleCheck(e.target.dataset.id,e.target.checked)}
  else if(e.target.dataset.action==='shift-check'){await toggleShiftCheck(e.target.dataset.id,e.target.checked)}
  else if(e.target.dataset.action==='shift-rack-check'){await toggleRackCheck(e.target.dataset.id,e.target.checked)}
- else if(e.target.dataset.action==='demo-ai-status'){await simulateAiStatus(e.target.dataset.id,e.target.value)}
  else if(e.target.id==='shift-date'){state.shiftDate=e.target.value||localDay();state.shiftView='mine';await loadShiftCloud();render()}
  else if(e.target.id==='photo-report-date'){state.photoReportDate=e.target.value||localDay();state.photoReportItems=[];state.photoReportLoaded=false;await loadPhotoReport()}
  else if(e.target.id==='photo-report-shift'){const y=window.scrollY;state.photoReportShift=e.target.value;render();window.scrollTo(0,y)}
@@ -1477,9 +1474,9 @@ function mapPhotoFor(userId,s=state.shiftNumber){return state.mapPhotos.find(p=>
 function rackCheckedWithPhoto(r,s=state.shiftNumber){
  const check=rackCheck(r.id,s),photo=latestRackPhoto(r.id,s);
  if(!check?.is_checked||!photo||!photo.client_captured_at)return false;
- return photo.ai_status==='ok'||!!(check.manual_note&&check.manual_note.trim());
+ return true; // Checklist manual + foto kamera dengan waktu pengambilan adalah syarat selesai.
 }
-function rackProgress(s=state.shiftNumber){const arr=rackListForShift(s);return {done:arr.filter(r=>rackCheckedWithPhoto(r,s)).length,total:arr.length,photos:arr.filter(r=>!!latestRackPhoto(r.id,s)).length,warnings:arr.filter(r=>latestRackPhoto(r.id,s)?.ai_status==='warning'&&!rackCheckedWithPhoto(r,s)).length};}
+function rackProgress(s=state.shiftNumber){const arr=rackListForShift(s);return {done:arr.filter(r=>rackCheckedWithPhoto(r,s)).length,total:arr.length,photos:arr.filter(r=>!!latestRackPhoto(r.id,s)).length};}
 function mapProgress(s=state.shiftNumber){const crew=shiftScheduled(s);return {total:crew.length,done:crew.filter(r=>!!mapPhotoFor(r.user_id,s)?.client_captured_at).length};}
 function shiftItemDone(key,s=state.shiftNumber){
  if(key==='sisir-harga'){const r=rackProgress(s);return r.total>0&&r.done===r.total;}
@@ -1519,23 +1516,16 @@ function photoAuditBadge(photo){
  if(!photo.server_received_at)return '<span class="proof-audit needs">⌛ Waktu server belum tersedia</span>';
  return `<span class="proof-audit good">✓ Diterima server ${esc(niceTime(photo.server_received_at))}</span>`;
 }
-function aiStatusBadge(photo){
- if(!photo)return '<span class="ai-pill missing">Belum ada foto</span>';
- const status=photo.ai_status||'pending';
- const labels={pending:'⏳ Menunggu analisis AI',ok:'✓ AI: label tampak lengkap',warning:'⚠ Harga belum lengkap',uncertain:'⚠ Foto belum jelas',unavailable:'AI belum aktif',error:'⚠ Analisis gagal'};
- return `<span class="ai-pill ${esc(status)}">${esc(labels[status]||'Perlu diperiksa')}</span>`;
-}
 function rackProgressDetails(s=state.shiftNumber){
  const schedule=shiftScheduled(s),allRacks=rackListForShift(s),
  racks=state.mode==='demo'?allRacks:allRacks.filter(r=>r.user_id===state.user?.id),
  p={done:racks.filter(r=>rackCheckedWithPhoto(r,s)).length,total:racks.length,
- photos:racks.filter(r=>!!latestRackPhoto(r.id,s)).length,
- warnings:racks.filter(r=>latestRackPhoto(r.id,s)?.ai_status==='warning'&&!rackCheckedWithPhoto(r,s)).length};
+ photos:racks.filter(r=>!!latestRackPhoto(r.id,s)).length};
  if(!schedule.length)return `<div class="rack-panel"><div class="notice info">Belum ada jadwal Shift ${s}; tambah petugas agar foto dan ceklis rak aktif.</div></div>`;
  if(!racks.length)return `<div class="rack-panel"><div class="notice info">${state.mode!=='demo'?'Belum ada rak yang ditugaskan ke akun Anda pada Shift '+s+'. Minta admin menyinkronkan PIC rak.':'Daftar rak petugas belum dimasukkan.'}</div></div>`;
  const groups=[...new Set(racks.map(x=>x.user_id))];
  return `<div class="rack-panel"><div class="rack-head"><b>Foto kamera + crop tiap rak</b><span>${p.done}/${p.total} selesai</span></div>
- <div class="rack-target-stats">${state.mode!=='demo'?'<span>Rak saya saja</span>':''}<span>📷 ${p.photos}/${p.total} foto rak</span><span>⚠ ${p.warnings} perlu dicek</span><span>✓ ${p.done} terverifikasi</span></div>
+ <div class="rack-target-stats">${state.mode!=='demo'?'<span>Rak saya saja</span>':''}<span>📷 ${p.photos}/${p.total} foto rak</span><span>✓ ${p.done} sudah dicek manual</span></div>
  ${groups.map(u=>{
   const list=racks.filter(r=>r.user_id===u),finished=list.filter(r=>rackCheckedWithPhoto(r,s)).length;
   return `<div class="rack-person"><div class="rack-person-head"><b>${esc(memberName(u))}</b><small>${finished}/${list.length} rak</small></div>
@@ -1544,13 +1534,11 @@ function rackProgressDetails(s=state.shiftNumber){
    return `<div class="rack-photo-row ${ok?'done':''}"><div class="rack-photo-top"><label class="rack-checkbox"><input type="checkbox" data-action="shift-rack-check" data-id="${esc(r.id)}" ${ok?'checked':''} ${!can||!photo?'disabled':''}><strong>${esc(r.rack_name)}</strong></label><small>${ok?'✓ Selesai':'Belum selesai'}</small></div>
    <div class="rack-photo-actions"><button type="button" class="shift-upload ${!can?'disabled':''}" data-action="camera-open" data-kind="rack" data-id="${esc(r.id)}" ${!can?'disabled':''}>📷 ${photo?'Foto ulang • kamera':'Kamera rak + crop'}</button>
    ${photo?`<button class="btn outline sm" data-action="extra-open" data-kind="rack" data-id="${esc(photo.id)}">Lihat foto</button>`:''}</div>
-   <div class="rack-photo-ai">${photoAuditBadge(photo)}${aiStatusBadge(photo)}${photo?.ai_note?`<p>${esc(photo.ai_note)}</p>`:''}${ch?.manual_note?`<p>✓ Manual: ${esc(ch.manual_note)}</p>`:''}</div>
-   ${state.mode==='demo'&&photo&&can?`<div class="mock-ai"><label>Simulasi hasil AI (demo saja)</label><select class="field" data-action="demo-ai-status" data-id="${esc(photo.id)}"><option value="unavailable" ${photo.ai_status==='unavailable'?'selected':''}>AI belum aktif</option><option value="warning" ${photo.ai_status==='warning'?'selected':''}>⚠ Harga belum lengkap</option><option value="uncertain" ${photo.ai_status==='uncertain'?'selected':''}>Foto kurang jelas</option><option value="ok" ${photo.ai_status==='ok'?'selected':''}>Label tampak lengkap</option></select></div>`:''}
-   ${photo&&!ok&&can&&['error','unavailable','pending'].includes(photo.ai_status)&&state.mode==='cloud'?`<button class="btn soft sm" data-action="retry-rack-ai" data-id="${esc(photo.id)}">↻ Coba analisis AI</button>`:''}
+   <div class="rack-photo-ai">${photoAuditBadge(photo)}${photo?'<span class="proof-audit good">✓ Foto tersimpan · periksa label harga langsung</span>':''}${ch?.manual_note?`<p>✓ Catatan: ${esc(ch.manual_note)}</p>`:''}</div>
    </div>`;
   }).join('')}</div>`;
  }).join('')}
- <p class="small muted" style="margin-top:12px">Setiap nomor rak wajib dipotret melalui kamera aplikasi + area rak dipilih (crop). Foto lama perlu diambil ulang. AI memberikan peringatan jika label harga tampak belum lengkap atau tidak terlihat. Petugas tetap perlu verifikasi langsung; jika AI keliru, ceklis perlu konfirmasi manual dengan alasan.</p></div>`;
+ <p class="small muted" style="margin-top:12px">Setiap rak wajib difoto menggunakan kamera aplikasi dan di-crop sesuai area rak. Setelah foto tersimpan di cloud, PIC wajib memeriksa langsung semua label harga pada rak sebelum mencentang selesai. Foto dan waktu pengambilan tetap tercatat.</p></div>`;
 }
 function mapProgressDetails(s=state.shiftNumber){
  const allCrew=shiftScheduled(s),crew=(state.mode==='demo'||monitoringShift(s))?allCrew:allCrew.filter(r=>r.user_id===state.user?.id),p=mapProgress(s);
@@ -1692,16 +1680,6 @@ async function deactivateRack(id){
  else{const r=await state.db.from('shift_rack_assignments').update({is_active:false}).eq('id',id);if(r.error)throw r.error}
  await afterShiftMutation();notify('Tanggung jawab rak dinonaktifkan');
 }
-async function simulateAiStatus(photoId,desired){
- if(state.mode!=='demo')return;
- const photo=state.rackPhotos.find(p=>p.id===photoId),statuses=['ok','warning','uncertain','unavailable'];
- if(!photo||!statuses.includes(desired))return;
- photo.ai_status=desired;
- photo.ai_note={ok:'Simulasi: label harga tampak lengkap pada foto.',warning:'Simulasi: sebagian produk pada foto tampak belum memiliki label harga.',uncertain:'Simulasi: foto terlalu jauh atau label tidak terbaca.',unavailable:'Demo lokal: AI belum terhubung.'}[desired];
- const checked=rackCheck(photo.assignment_id,photo.shift_number);
- if(checked){checked.is_checked=false;checked.manual_note='';checked.completed_at=null;checked.completed_by=null;}
- await afterShiftMutation();notify('Status simulasi AI diperbarui (bukan hasil deteksi nyata).');
-}
 function validateExtraPhoto(file){
  if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('Pilih foto JPG, PNG, atau WebP.');
  if(file.size>8*1024*1024)throw new Error('Foto maksimal 8 MB. Kompres atau ambil ulang foto.');
@@ -1717,9 +1695,9 @@ async function uploadRackPhoto(id,files,capturedAt=null){
  if(!r||!shiftScheduled().some(x=>x.user_id===r.user_id))throw new Error('Rak tidak terdaftar pada shift ini.');
  if(!shiftCanCheck()||(state.mode!=='demo'&&!isAdmin()&&r.user_id!==state.user?.id))throw new Error('Hanya PIC rak atau admin yang boleh mengunggah foto.');
  const stamped=await watermarkedImage(f,{userName:currentUserName(),shiftNumber:state.shiftNumber,itemLabel:`Rak ${r.rack_name}`,areaLabel:`Sisir harga • PIC ${memberName(r.user_id)}`,now:capturedAt});
- const v={workspace_id:state.workspace.id,work_date:cleanShiftDate(),shift_number:state.shiftNumber,assignment_id:r.id,user_id:r.user_id,uploaded_by:state.user.id,file_name:stamped.fileName,mime_type:'image/jpeg',ai_status:'pending',ai_note:'',client_captured_at:capturedAt.toISOString()};
+ const v={workspace_id:state.workspace.id,work_date:cleanShiftDate(),shift_number:state.shiftNumber,assignment_id:r.id,user_id:r.user_id,uploaded_by:state.user.id,file_name:stamped.fileName,mime_type:'image/jpeg',ai_status:'unavailable',ai_note:'',client_captured_at:capturedAt.toISOString()};
  if(state.mode==='demo'){
-  state.rackPhotos.push({id:uid(),...v,ai_status:'unavailable',ai_note:'Demo lokal: pemeriksaan AI memerlukan server dan API key.',data_url:stamped.dataUrl,created_at:new Date().toISOString()});
+  state.rackPhotos.push({id:uid(),...v,data_url:stamped.dataUrl,created_at:new Date().toISOString()});
   const check=rackCheck(id);if(check){check.is_checked=false;check.manual_note='';check.completed_at=null;check.completed_by=null;}
   await afterShiftMutation();notify(`Rak ${r.rack_name}: foto kamera + crop + timestamp tersimpan. Periksa lalu centang.`);return;
  }
@@ -1729,21 +1707,9 @@ async function uploadRackPhoto(id,files,capturedAt=null){
  const ins=await state.db.from('shift_rack_photos').insert({...v,object_path:path}).select().single();
  if(ins.error){await state.db.storage.from('shift-extra-evidence').remove([path]);throw ins.error}
  const check=rackCheck(id);if(check){const reset=await state.db.from('shift_rack_checks').update({is_checked:false,completed_at:null,completed_by:null,manual_note:''}).eq('id',check.id);if(reset.error)throw reset.error}
- await afterShiftMutation();notify(`Rak ${r.rack_name}: foto crop + timestamp diterima. AI sedang memeriksa…`);
- await analyseRackPhoto(ins.data.id);
+ await afterShiftMutation();notify(`Rak ${r.rack_name}: foto tersimpan di cloud. Periksa label harga secara langsung lalu centang selesai.`);
 }
 
-async function analyseRackPhoto(photoId){
- if(state.mode!=='cloud'){notify('AI hanya tersedia setelah server online aktif.',true);return}
- try{
-  const res=await state.db.functions.invoke('rack-price-ai',{body:{photo_id:photoId}});
-  if(res.error)throw res.error;
-  await loadShiftCloud();render();
-  if(res.data?.status==='warning')notify('⚠ Harga belum lengkap / label harga tidak terlihat. Periksa rak!',true);
-  else if(res.data?.status==='ok')notify('Analisis selesai: label harga terlihat pada foto. Tetap periksa langsung.');
-  else notify('Foto tersimpan. AI belum dapat memastikan kelengkapan harga.');
- }catch(e){await loadShiftCloud();render();notify('Foto tersimpan, tetapi pemeriksaan AI gagal: '+errMessage(e),true)}
-}
 async function uploadMapPhoto(userId,files,capturedAt=null){
  if(!(capturedAt instanceof Date)||!Number.isFinite(capturedAt.getTime()))throw new Error('Foto Map Do It wajib diambil dari kamera aplikasi.');
  const f=files?.[0];if(!f)return;validateExtraPhoto(f);
@@ -1782,19 +1748,15 @@ async function toggleRackCheck(id,checked){
  if(!shiftCanCheck()||(state.mode!=='demo'&&!isAdmin()&&state.user?.id!==r.user_id))throw new Error('Hanya PIC rak atau admin yang dapat menceklis.');
  const photo=latestRackPhoto(id);if(checked&&!photo?.client_captured_at)throw new Error('Foto rak v7 wajib diambil ulang dari kamera sebelum checklist.');
  let manual='';
- if(checked&&photo.ai_status!=='ok'){
-  if(photo.ai_status==='warning'){
-   manual=prompt(`⚠ AI mendeteksi harga belum lengkap pada rak ${r.rack_name}. Periksa dan perbaiki label harga terlebih dahulu. Jelaskan tindakan/koreksi manual (minimal 12 karakter):`)||'';
-   if(manual.trim().length<12)throw new Error('Belum selesai: tambahkan alasan verifikasi manual (min. 12 karakter), atau foto ulang setelah memperbaiki harga.');
-  }else{
-   if(!confirm(`Hasil AI: ${photo.ai_status==='unavailable'?'belum aktif':photo.ai_status==='uncertain'?'foto belum jelas':'belum selesai / gagal'}. Apakah Anda sudah memeriksa semua label harga rak ${r.rack_name} secara langsung?`))throw new Error('Checklist belum ditandai.');
-   manual='Petugas mengonfirmasi pemeriksaan manual atas seluruh label harga.';
-  }
+ if(checked){
+  const confirmed=confirm(`Apakah Anda telah memeriksa LANGSUNG seluruh label harga di rak ${r.rack_name}, dan memastikan tidak ada label yang belum diperbaiki? Pilih OK jika benar-benar sudah selesai.`);
+  if(!confirmed)throw new Error('Checklist belum ditandai. Periksa dan perbaiki label harga dahulu.');
+  manual='PIC mengonfirmasi pemeriksaan langsung seluruh label harga rak.';
  }
  const v={workspace_id:state.workspace.id,work_date:cleanShiftDate(),shift_number:state.shiftNumber,assignment_id:id,user_id:r.user_id,is_checked:checked,completed_at:checked?new Date().toISOString():null,completed_by:checked?state.user.id:null,manual_note:checked?manual:''};
  if(state.mode==='demo'){let old=rackCheck(id);if(old)Object.assign(old,v);else state.rackChecks.push({id:uid(),...v})}
  else{const res=await state.db.from('shift_rack_checks').upsert(v,{onConflict:'workspace_id,work_date,shift_number,assignment_id'});if(res.error)throw res.error}
- await afterShiftMutation();notify(checked?'Rak selesai, foto dan hasil AI tercatat.':'Checklist harga rak dibatalkan.');
+ await afterShiftMutation();notify(checked?'Rak selesai, foto dan konfirmasi manual tercatat di cloud.':'Checklist harga rak dibatalkan.');
 }
 function urlBase64ToUint8Array(base64){const pad='='.repeat((4-base64.length%4)%4),raw=atob((base64+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(raw,c=>c.charCodeAt(0));}
 async function enableShiftPush(){
@@ -1818,8 +1780,8 @@ function exportShiftCSV(allShifts=false){
  for(const s of (allShifts?shiftNumbers:[state.shiftNumber])){
   for(const area of shiftAreasFor(s))for(const [key,title] of area.items){
    const l=shiftLog(key,s),isRack=key==='sisir-harga',r=isRack?rackProgress(s):null;
-   rows.push([cleanShiftDate(),s,area.name,title,shiftItemDone(key,s)?'Selesai':'Belum',isRack?'Per PIC':l?.is_checked?memberName(l.completed_by):'',l?.completed_at?niceTime(l.completed_at):'',isRack?r.photos:key==='map-do-it'?mapProgress(s).done:shiftProofList(l).length,isRack?`${r.done}/${r.total} rak; ${r.photos} foto; ${r.warnings} warning`:key==='map-do-it'?`${mapProgress(s).done}/${mapProgress(s).total} foto PIC`:l?.note||'']);
-   if(isRack)for(const rack of rackListForShift(s)){const c=rackCheck(rack.id,s),p=latestRackPhoto(rack.id,s);rows.push([cleanShiftDate(),s,'Sisir harga per PIC',rack.rack_name,rackCheckedWithPhoto(rack,s)?'Selesai':'Belum',memberName(rack.user_id),c?.completed_at?niceTime(c.completed_at):'',rackPhotosFor(rack.id,s).length,p?.ai_status||'Belum foto',p?.client_captured_at||'',p?.server_received_at||'',p?.client_captured_at?(p?.server_received_at?'Waktu tercatat server':'Demo/waktu HP'):'Bukti lama/perlu foto ulang']);}
+   rows.push([cleanShiftDate(),s,area.name,title,shiftItemDone(key,s)?'Selesai':'Belum',isRack?'Per PIC':l?.is_checked?memberName(l.completed_by):'',l?.completed_at?niceTime(l.completed_at):'',isRack?r.photos:key==='map-do-it'?mapProgress(s).done:shiftProofList(l).length,isRack?`${r.done}/${r.total} rak; ${r.photos} foto; verifikasi manual`:key==='map-do-it'?`${mapProgress(s).done}/${mapProgress(s).total} foto PIC`:l?.note||'']);
+   if(isRack)for(const rack of rackListForShift(s)){const c=rackCheck(rack.id,s),p=latestRackPhoto(rack.id,s);rows.push([cleanShiftDate(),s,'Sisir harga per PIC',rack.rack_name,rackCheckedWithPhoto(rack,s)?'Selesai':'Belum',memberName(rack.user_id),c?.completed_at?niceTime(c.completed_at):'',rackPhotosFor(rack.id,s).length,c?.manual_note||'Belum dikonfirmasi',p?.client_captured_at||'',p?.server_received_at||'',p?.client_captured_at?(p?.server_received_at?'Waktu tercatat server':'Demo/waktu HP'):'Bukti lama/perlu foto ulang']);}
   }
   for(const oldLog of state.shiftLogs.filter(l=>l.shift_number===s&&l.work_date===cleanShiftDate()&&!shiftItemsFor(s).some(i=>i[0]===l.item_key))){rows.push([cleanShiftDate(),s,'Arsip','Pekerjaan lama: '+oldLog.item_key,oldLog.is_checked?'Selesai':'Belum',oldLog.completed_by?memberName(oldLog.completed_by):'',oldLog.completed_at?niceTime(oldLog.completed_at):'',shiftProofList(oldLog).length,'Poin sudah diarsipkan; riwayat dipertahankan']);}
   for(const person of shiftScheduled(s)){const photo=mapPhotoFor(person.user_id,s);rows.push([cleanShiftDate(),s,'Map Do It per PIC',photo?.rack_note||'Belum diisi',photo?.client_captured_at?'Foto terkirim':'Belum',memberName(person.user_id),photo?.server_received_at?niceTime(photo.server_received_at):'',photo?.client_captured_at?1:0,'1 foto kamera wajib per orang',photo?.client_captured_at||'',photo?.server_received_at||'',photo?.client_captured_at?(photo?.server_received_at?'Waktu tercatat server':'Demo/waktu HP'):'Bukti lama/perlu foto ulang']);}

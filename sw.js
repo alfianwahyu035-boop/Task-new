@@ -1,4 +1,4 @@
-const CACHE = 'taskmate-v25-pocket-wallet-refined';
+const CACHE = 'taskmate-v27-manual-price-check-no-ai';
 const ASSETS = ['./','./index.html','./styles.css','./themes.css','./app.js','./excel-import.js','./Template_Import_TaskMate_Jadwal_Rak.xlsx','./roster-data.js','./config.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
