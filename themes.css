@@ -541,3 +541,13 @@ html[data-tm-shape="neo"] .shift-layout .shift-side > .panel::before {
 .tm-schedule-range>summary{font-size:12px;font-weight:800;cursor:pointer;color:var(--tm-text,#24374d)}
 @media(max-width:760px){.tm-sync-word{display:none}.tm-cloud-sync{padding:7px;min-width:34px;justify-content:center}.tm-sync-icon{font-size:18px}.tm-schedule-form{grid-template-columns:1fr 1fr}.tm-schedule-form label:nth-child(2),.tm-schedule-form label:nth-child(3){grid-column:auto}}
 @media(max-width:390px){.tm-schedule-form{grid-template-columns:1fr}.tm-schedule-form label{grid-column:1/-1!important}}
+
+/* v22: personal task view / administrator monitoring are visually separated. */
+.tm-my-tasks-toolbar{display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap;min-width:0;padding:14px 16px;margin:17px 0 13px;border:1px solid var(--tm-line,#d8e1ee);border-radius:17px;background:var(--tm-card,#fff);color:var(--tm-text,#1c293b)}
+.tm-my-tasks-toolbar>div:first-child{display:grid;gap:5px;min-width:0;flex:1 1 180px}
+.tm-my-tasks-toolbar strong{font-size:13px;font-weight:850}.tm-my-tasks-toolbar small{color:var(--tm-muted,#64748b);font-size:11px;line-height:1.5}
+.tm-shift-view-options{display:flex;gap:5px;padding:4px;border:1px solid var(--tm-line,#d8e1ee);background:var(--tm-layer,#eef3f8);border-radius:13px;flex:0 1 auto;min-width:0}
+.tm-shift-view-options button{border:0;background:transparent;border-radius:10px;color:var(--tm-muted,#64748b);font-weight:800;font-size:11px;padding:9px 11px;white-space:nowrap;cursor:pointer}
+.tm-shift-view-options button.active{background:var(--tm-accent,#3677ed);color:var(--tm-accent-ink,#fff);box-shadow:0 3px 12px var(--tm-glow,#0001)}
+.tm-shift-view-options button:focus-visible{outline:3px solid var(--tm-accent,#3677ed);outline-offset:2px}
+@media(max-width:500px){.tm-my-tasks-toolbar{padding:12px}.tm-shift-view-options{width:100%;display:grid;grid-template-columns:1fr 1fr}.tm-shift-view-options button{min-width:0;padding:9px 6px;font-size:11px}}
