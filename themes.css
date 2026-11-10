@@ -1045,3 +1045,62 @@ html[data-tm-theme="pocket"] .bottom-nav>button.active>span:last-child{flex:0 0 
 html[data-tm-theme="pocket"] .bottom-nav>button:not(.active)>.ico{width:clamp(31px,8vw,37px)!important;height:37px!important;flex:0 0 auto!important}
 }
 @media(max-width:375px){html[data-tm-theme="pocket"] .bottom-nav>button.active{max-width:calc(100vw - 205px)!important;padding-right:6px!important}html[data-tm-theme="pocket"] .bottom-nav>button.active>span:last-child{font-size:10px!important}}
+
+
+/* v28: compact Admin Shift/PIC accordion + independent rack / Map Do It scrollers */
+.tm-shift-assignment{overflow:visible;min-width:0}
+.tm-shift-assignment-toggle{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ appearance:none;-webkit-appearance:none;border:0;background:transparent;
+ padding:2px 0;margin:0;width:100%;min-height:50px;text-align:left;
+ font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;
+}
+.tm-shift-assignment-toggle:focus-visible,
+.tm-rack-scroll:focus-visible,.tm-map-scroll:focus-visible{
+ outline:2px solid var(--tm-accent,#4d89df);outline-offset:3px;
+}
+.tm-shift-assignment-label{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.tm-shift-assignment-label strong{font-size:clamp(13px,2.8vw,16px);line-height:1.3;color:inherit}
+.tm-shift-assignment-label small{font-size:11px;line-height:1.4;color:var(--tm-muted,#8799ad);white-space:normal}
+.tm-shift-assignment-pill{
+ flex:none;display:inline-flex;align-items:center;gap:8px;justify-content:center;
+ padding:9px 12px;border-radius:13px;font-size:12px;font-weight:800;
+ color:var(--tm-text,#23334a);background:var(--tm-layer,#edf2f9);
+ border:1px solid var(--tm-line,#d9e2ed);
+}
+.tm-shift-assignment-chevron{display:inline-block;transition:transform .18s ease;line-height:1}
+.tm-shift-assignment[data-expanded="true"] .tm-shift-assignment-chevron{transform:rotate(180deg)}
+.tm-shift-assignment-body[hidden]{display:none!important}
+.tm-shift-assignment-body{padding-top:10px;margin-top:11px;border-top:1px solid var(--tm-line,#d9e2ed)}
+.tm-shift-assignment-body .tm-pic-list{margin-top:4px}
+.tm-shift-assignment[data-expanded="false"]{padding-top:11px!important;padding-bottom:11px!important}
+.tm-rack-scroll,.tm-map-scroll{
+ display:block;box-sizing:border-box;max-width:100%;min-width:0;
+ max-height:min(51vh,430px);overflow-y:auto;overflow-x:hidden;
+ overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
+ touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#8f8a7e80 transparent;
+ padding:5px 9px 7px 3px;border:1px solid var(--tm-line,#d9e2ed);
+ border-radius:13px;
+}
+.tm-map-scroll{max-height:min(44vh,340px)}
+.tm-rack-scroll::-webkit-scrollbar,.tm-map-scroll::-webkit-scrollbar{width:5px}
+.tm-rack-scroll::-webkit-scrollbar-thumb,.tm-map-scroll::-webkit-scrollbar-thumb{background:#9a92858f;border-radius:9px}
+.tm-rack-scroll>.rack-person:last-child,.tm-map-scroll>.map-crew-card:last-child{margin-bottom:0}
+.tm-inner-scroll-note{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+ padding:3px 2px 8px;color:var(--tm-muted,#72869e)}
+html[data-tm-theme="pocket"] .tm-shift-assignment-pill{
+ background:#ffdcaa!important;border:1px solid #a98465!important;color:#332b27!important;
+}
+html[data-tm-theme="pocket"] :is(.tm-rack-scroll,.tm-map-scroll){
+ background:#514943!important;border:1px solid #79695f!important;
+}
+html[data-tm-theme="pocket"] :is(.tm-shift-assignment-label small,.tm-inner-scroll-note){color:#ead5c3!important}
+@media(max-width:760px){
+ .tm-rack-scroll{max-height:min(48vh,395px)}
+ .tm-map-scroll{max-height:min(43vh,325px)}
+ .tm-shift-assignment-toggle{gap:8px}
+ .tm-shift-assignment-pill{padding:8px 10px}
+}
+
+/* Keep map/rack labels readable on Pocket Wallet's charcoal panels. */
+html[data-tm-theme="pocket"] :is(.rack-head b,.rack-head>span,.rack-person-head b,.rack-person-head small,.map-crew-top b,.map-progress-help){color:#fae7d4!important}
