@@ -525,3 +525,19 @@ html[data-tm-shape="neo"] .shift-layout .shift-side > .panel::before {
   max-width:calc(100% - 5px)!important;
  }
 }
+
+/* TaskMate v21 — schedule editor & direct cloud sync */
+.tm-cloud-sync{display:flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--tm-line,#dce3ef);border-radius:12px;background:var(--tm-card,#fff);color:var(--tm-text,#31415b);font:800 11px system-ui;cursor:pointer;white-space:nowrap}
+.tm-cloud-sync:active .tm-sync-icon{transform:rotate(70deg)}.tm-sync-icon{font-size:19px;line-height:1;transition:transform .2s}
+.tm-schedule-admin{margin-top:15px;background:var(--tm-layer,#f5f8ff);border:1px solid var(--tm-line,#dbe3ef);border-radius:14px;overflow:hidden}
+.tm-schedule-admin>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;padding:14px;font-size:13px;font-weight:850;color:var(--tm-text,#23364a);list-style:none}
+.tm-schedule-admin>summary::-webkit-details-marker{display:none}.tm-schedule-admin>summary span{font-size:10px;white-space:nowrap;color:var(--tm-muted,#637789)}
+.tm-schedule-content{background:var(--tm-card,#fff);padding:14px;border-top:1px solid var(--tm-line,#dbe3ef)}
+.tm-schedule-form{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px;align-items:end}
+.tm-schedule-form label{display:grid;gap:6px;font-size:11px;font-weight:800;color:var(--tm-muted,#596b7e);min-width:0}
+.tm-schedule-form label:first-child{grid-column:1/-1}.tm-schedule-form .field{width:100%;min-width:0;color:var(--tm-text,#172c45)}
+.tm-schedule-current,.tm-schedule-actions{grid-column:1/-1}.tm-schedule-current{font-size:11px;color:var(--tm-muted,#61768b);padding:9px;border-radius:8px;background:var(--tm-layer,#f4f7ff)}
+.tm-schedule-actions{display:flex;flex-wrap:wrap;gap:8px}.tm-schedule-range{margin-top:15px;padding-top:10px;border-top:1px solid var(--tm-line,#dbe3ef)}
+.tm-schedule-range>summary{font-size:12px;font-weight:800;cursor:pointer;color:var(--tm-text,#24374d)}
+@media(max-width:760px){.tm-sync-word{display:none}.tm-cloud-sync{padding:7px;min-width:34px;justify-content:center}.tm-sync-icon{font-size:18px}.tm-schedule-form{grid-template-columns:1fr 1fr}.tm-schedule-form label:nth-child(2),.tm-schedule-form label:nth-child(3){grid-column:auto}}
+@media(max-width:390px){.tm-schedule-form{grid-template-columns:1fr}.tm-schedule-form label{grid-column:1/-1!important}}

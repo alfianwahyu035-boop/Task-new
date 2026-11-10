@@ -128,7 +128,13 @@ async function start(){
   }catch(e){document.querySelector('#app').innerHTML='<div class="boot"><h2>Supabase gagal terhubung</h2><p>Periksa internet dan konfigurasi aplikasi.</p></div>';console.error(e);return;}
  }else{state.mode='demo';setDemo();render()}
  if('serviceWorker' in navigator && location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
- setInterval(checkReminders,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkReminders()});
+ setInterval(checkReminders,60000);
+ document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)return;
+  checkReminders();
+  if(state.mode==='cloud'&&state.user&&navigator.onLine&&(!state.lastSync||Date.now()-new Date(state.lastSync).getTime()>60000))syncNow();
+ });
+ window.addEventListener('online',()=>{if(state.mode==='cloud'&&state.user)syncNow()});
 }
 async function loadAll(){
  if(state.mode!=='cloud'){setDemo();render();return}
@@ -184,15 +190,26 @@ function subscribe(wid){
  .on('postgres_changes',{event:'*',schema:'public',table:'shift_rack_assignments',filter:`workspace_id=eq.${wid}`},requestReload)
  .on('postgres_changes',{event:'*',schema:'public',table:'shift_rack_checks',filter:`workspace_id=eq.${wid}`},requestReload)
  .on('postgres_changes',{event:'*',schema:'public',table:'shift_staff_links',filter:`workspace_id=eq.${wid}`},requestReload)
+ .on('postgres_changes',{event:'*',schema:'public',table:'shift_staff_seed',filter:`workspace_id=eq.${wid}`},requestReload)
  .on('postgres_changes',{event:'*',schema:'public',table:'shift_rack_photos',filter:`workspace_id=eq.${wid}`},requestReload)
  .on('postgres_changes',{event:'*',schema:'public',table:'shift_map_photos',filter:`workspace_id=eq.${wid}`},requestReload)
  .subscribe();state.realtime=chan;
 }
 function requestReload(){clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>{if(state.mode==='cloud'&&state.user)refreshCloud().catch(showError)},450)}
-async function syncNow(){try{if(state.mode==='cloud')await loadAll();else {persistDemo();render()}notify('Data sudah diperbarui')}catch(e){showError(e)}}
+async function syncNow(){
+ if(state.reloading)return;
+ state.reloading=true;
+ try{
+  if(state.mode==='cloud'){
+   if(!navigator.onLine)throw new Error('HP sedang offline. Sambungkan internet lalu coba sinkron ulang.');
+   await loadAll();
+  }else {persistDemo();render()}
+  notify('✓ Data HP sudah diperbarui dari Cloud · '+new Intl.DateTimeFormat('id-ID',{hour:'2-digit',minute:'2-digit'}).format(new Date()));
+ }catch(e){showError(e)}finally{state.reloading=false}
+}
 function shell(inner){
  const headline={home:'Dashboard',shift:'Checklist Shift 1–3',tasks:'Daftar Tugas',reports:'Laporan Pekerjaan',team:'Tim & Anggota',settings:'Pengaturan'}[state.tab];
- return `<div class="app-shell"><aside class="sidebar"><div class="logo"><mark>✓</mark> TaskMate</div><div class="nav-caption">MENU UTAMA</div>${tabs.map(([id,t])=>`<button class="side-item ${state.tab===id?'active':''}" data-action="tab" data-tab="${id}"><span class="ico">${icons[id]}</span>${t}</button>`).join('')}<div class="sidebar-bottom"><h4>✨ Satu tim, satu progres.</h4><p>Atur tugas, pantau laporan, dan simpan bukti pekerjaan dalam satu tempat.</p></div></aside><main class="main"><header class="topbar"><div class="top-left"><div class="eyebrow">${state.workspace?esc(state.workspace.name):'TaskMate'} / ${dayLabel()}</div><h1>${headline}</h1></div><div class="top-actions"><span class="chip ${state.mode==='demo'?'demo':''}"><i class="dot"></i>${state.mode==='demo'?'Mode demo':'Tersambung'}</span><div class="avatar" title="${esc(currentUserName())}">${esc(initials(currentUserName()))}</div></div></header>${state.mode==='demo'?`<div class="notice info"><span>ⓘ</span><span><b>Mode demo.</b> Data hanya tersimpan di HP ini. <button class="link-button" data-action="open-config">Hubungkan Supabase</button> untuk sinkron antar-HP.</span></div>`:''}${state.notice?`<div class="notice">${esc(state.notice)}</div>`:''}${inner}</main>${state.tab==='shift'?'':'<button class="floating" aria-label="Tambah tugas" data-action="new-task">+</button>'}<nav class="bottom-nav">${tabs.map(([id,t])=>`<button class="${state.tab===id?'active':''}" data-action="tab" data-tab="${id}"><span class="ico">${icons[id]}</span><span>${t==='Pengaturan'?'Setelan':t==='Checklist Shift'?'Shift':t}</span></button>`).join('')}</nav></div>`;
+ return `<div class="app-shell"><aside class="sidebar"><div class="logo"><mark>✓</mark> TaskMate</div><div class="nav-caption">MENU UTAMA</div>${tabs.map(([id,t])=>`<button class="side-item ${state.tab===id?'active':''}" data-action="tab" data-tab="${id}"><span class="ico">${icons[id]}</span>${t}</button>`).join('')}<div class="sidebar-bottom"><h4>✨ Satu tim, satu progres.</h4><p>Atur tugas, pantau laporan, dan simpan bukti pekerjaan dalam satu tempat.</p></div></aside><main class="main"><header class="topbar"><div class="top-left"><div class="eyebrow">${state.workspace?esc(state.workspace.name):'TaskMate'} / ${dayLabel()}</div><h1>${headline}</h1></div><div class="top-actions"><button type="button" class="tm-cloud-sync" data-action="sync" aria-label="Sinkron ulang data dari cloud" title="Sinkronkan sekarang dari Supabase"><span class="tm-sync-icon" aria-hidden="true">↻</span><span class="tm-sync-word">Sinkron</span></button><span class="chip ${state.mode==='demo'?'demo':''}"><i class="dot"></i>${state.mode==='demo'?'Mode demo':'Tersambung'}</span><div class="avatar" title="${esc(currentUserName())}">${esc(initials(currentUserName()))}</div></div></header>${state.mode==='demo'?`<div class="notice info"><span>ⓘ</span><span><b>Mode demo.</b> Data hanya tersimpan di HP ini. <button class="link-button" data-action="open-config">Hubungkan Supabase</button> untuk sinkron antar-HP.</span></div>`:''}${state.notice?`<div class="notice">${esc(state.notice)}</div>`:''}${inner}</main>${state.tab==='shift'?'':'<button class="floating" aria-label="Tambah tugas" data-action="new-task">+</button>'}<nav class="bottom-nav">${tabs.map(([id,t])=>`<button class="${state.tab===id?'active':''}" data-action="tab" data-tab="${id}"><span class="ico">${icons[id]}</span><span>${t==='Pengaturan'?'Setelan':t==='Checklist Shift'?'Shift':t}</span></button>`).join('')}</nav></div>`;
 }
 function metric(label,value,icon,color,foot){return `<div class="metric"><div class="metric-top"><span class="metric-label">${label}</span><span class="metric-icon ${color}">${icon}</span></div><strong>${value}</strong><div class="metric-foot">${foot}</div></div>`}
 function taskCard(t){
@@ -402,7 +419,7 @@ function teamPage(){
  <section class="panel"><h3>Kode Undangan Tim</h3><p class="small muted">Bagikan hanya ke calon karyawan. Mereka tetap perlu disetujui admin setelah memasukkan kode ini.</p><div class="codebox"><strong>${esc(code)}</strong><p>${state.mode==='demo'?'Kode contoh':'Kode tim — persetujuan tetap wajib'}</p></div><button class="btn soft block" data-action="copy-code">⧉ Salin kode tim</button><button class="btn outline block" style="margin-top:10px" data-action="sync">↻ Perbarui daftar anggota</button><p class="small muted" style="margin-top:15px">Perubahan status berlaku di server Supabase. Akun yang dinonaktifkan harus disetujui ulang bila ingin menggunakan tim ini.</p></section></div>`;
 }
 function settingsPage(){
- return `<div class="section-header" style="margin-top:0"><div><h2>Pengaturan aplikasi</h2><p>Pengingat, akun, dan koneksi cloud</p></div></div>${personalThemePicker()}<div class="panel"><div class="settings-item"><div><h4>Mode penyimpanan</h4><p>${state.mode==='cloud'?'Supabase — data tim tersimpan online dan tersinkron antar HP.':'Demo — data hanya tersimpan lokal di perangkat ini.'}</p></div><span class="chip ${state.mode==='demo'?'demo':''}"><i class="dot"></i>${state.mode==='demo'?'Lokal':'Cloud'}</span></div><div class="settings-item"><div><h4>Notifikasi deadline</h4><p>Aktifkan pengingat browser saat aplikasi sedang terbuka (30 menit sebelum deadline).</p></div><button class="btn soft sm" data-action="notifications">${typeof Notification!=='undefined'&&Notification.permission==='granted'?'Sudah aktif':'Aktifkan'}</button></div><div class="settings-item"><div><h4>Sinkronisasi data</h4><p>Terakhir diperbarui: ${state.lastSync?esc(niceTime(state.lastSync)):'Belum pernah'}.</p></div><button class="btn outline sm" data-action="sync">↻ Sinkron</button></div><div class="settings-item"><div><h4>Pengaturan server Supabase</h4><p>${state.mode==='cloud'?'Proyek cloud terhubung.':'Hubungkan proyek Supabase untuk memakai banyak HP.'}</p></div><button class="btn outline sm" data-action="open-config">${state.mode==='cloud'?'Lihat konfigurasi':'Hubungkan'}</button></div>${state.mode==='cloud'?`<div class="settings-item"><div><h4>Akun pengguna</h4><p>${esc(state.user?.email||'')} · ${esc(currentUserName())}</p></div><button class="btn danger sm" data-action="logout">Keluar</button></div>`:`<div class="settings-item"><div><h4>Reset data demo</h4><p>Hapus tugas demo pada perangkat ini dan kembalikan data contoh.</p></div><button class="btn danger sm" data-action="reset-demo">Reset</button></div>`}</div><div class="notice info" style="margin-top:18px">🔒 &nbsp; Foto bukti pada mode cloud menggunakan bucket privat. Hanya anggota tim yang memiliki akses.</div>`;
+ return `<div class="section-header" style="margin-top:0"><div><h2>Pengaturan aplikasi</h2><p>Pengingat, akun, dan koneksi cloud</p></div></div>${personalThemePicker()}<div class="panel"><div class="settings-item"><div><h4>Mode penyimpanan</h4><p>${state.mode==='cloud'?'Supabase — data tim tersimpan online dan tersinkron antar HP.':'Demo — data hanya tersimpan lokal di perangkat ini.'}</p></div><span class="chip ${state.mode==='demo'?'demo':''}"><i class="dot"></i>${state.mode==='demo'?'Lokal':'Cloud'}</span></div><div class="settings-item"><div><h4>Notifikasi deadline</h4><p>Aktifkan pengingat browser saat aplikasi sedang terbuka (30 menit sebelum deadline).</p></div><button class="btn soft sm" data-action="notifications">${typeof Notification!=='undefined'&&Notification.permission==='granted'?'Sudah aktif':'Aktifkan'}</button></div><div class="settings-item"><div><h4>Sinkronisasi HP ↔ Cloud</h4><p>Tarik data terbaru dari Supabase. Terakhir: ${state.lastSync?esc(niceTime(state.lastSync)):'Belum pernah'}.</p></div><button class="btn outline sm" data-action="sync">↻ Sinkronkan sekarang</button></div><div class="settings-item"><div><h4>Pengaturan server Supabase</h4><p>${state.mode==='cloud'?'Proyek cloud terhubung.':'Hubungkan proyek Supabase untuk memakai banyak HP.'}</p></div><button class="btn outline sm" data-action="open-config">${state.mode==='cloud'?'Lihat konfigurasi':'Hubungkan'}</button></div>${state.mode==='cloud'?`<div class="settings-item"><div><h4>Akun pengguna</h4><p>${esc(state.user?.email||'')} · ${esc(currentUserName())}</p></div><button class="btn danger sm" data-action="logout">Keluar</button></div>`:`<div class="settings-item"><div><h4>Reset data demo</h4><p>Hapus tugas demo pada perangkat ini dan kembalikan data contoh.</p></div><button class="btn danger sm" data-action="reset-demo">Reset</button></div>`}</div><div class="notice info" style="margin-top:18px">🔒 &nbsp; Foto bukti pada mode cloud menggunakan bucket privat. Hanya anggota tim yang memiliki akses.</div>`;
 }
 function authPage(){
  const signup=state.authTab==='signup';
@@ -872,6 +889,10 @@ document.addEventListener('click',async e=>{
  else if(a==='auth-tab'){state.authTab=target.dataset.tab;render()}
  else if(a==='forgot-pass'){if(state.mode!=='cloud')return;const email=prompt('Masukkan email untuk tautan reset password:');if(email){const {error}=await state.db.auth.resetPasswordForEmail(email.trim());if(error)throw error;notify('Jika email terdaftar, tautan reset akan dikirim.')}}
  else if(a==='demo-mode'){state.mode='demo';state.user={id:'demo-me'};state.notice='';setDemo();render()}
+ else if(a==='tm-schedule-delete-one'){
+  const f=document.getElementById('tm-schedule-form');if(!f)return;
+  await editImportedSchedule(f.elements.staff_key.value,f.elements.day.value,null);
+ }
  else if(a==='sync'){await syncNow()}
  else if(a==='shift-today'){state.shiftDate=localDay();await loadShiftCloud();render()}
  else if(a==='shift-select'||a==='shift-go'){state.shiftNumber=Number(target.dataset.shift);state.tab='shift';state.shiftFilter='all';
@@ -910,6 +931,7 @@ document.addEventListener('change',async e=>{
  else if(e.target.id==='shift-excel-import'||e.target.id==='rack-excel-import'){const file=e.target.files?.[0];e.target.value='';await importExcelStaff(file);}
  else if(e.target.dataset.action==='shift-admin-select'){const id=e.target.value;if(id)await setShiftAdmin(id,Number(e.target.dataset.shift));else{notify('Pilih satu Admin Shift terjadwal',true);render()}}
  else if(e.target.dataset.action==='shift-pic-select'){await setShiftPic(e.target.dataset.item,e.target.value,Number(e.target.dataset.shift))}
+ else if(e.target.id==='tm-schedule-staff'||e.target.id==='tm-schedule-date'){refreshScheduleEditorHint()}
  else if(e.target.id==='priority-filter'){state.priority=e.target.value;render()}
  else if(e.target.dataset.action==='toggle-check'){await toggleCheck(e.target.dataset.id,e.target.checked)}
  else if(e.target.dataset.action==='shift-check'){await toggleShiftCheck(e.target.dataset.id,e.target.checked)}
@@ -923,7 +945,7 @@ document.addEventListener('change',async e=>{
  }catch(err){showError(err);render()}
 });
 document.addEventListener('submit',async e=>{
- const form=e.target;if(!['auth-form','create-workspace','join-workspace','task-form','add-check','config-form','shift-roster-form','rack-assign-form','staff-link-form','approve-link-form','shift-point-form'].includes(form.id))return;
+ const form=e.target;if(!['auth-form','create-workspace','join-workspace','task-form','add-check','config-form','shift-roster-form','rack-assign-form','staff-link-form','approve-link-form','shift-point-form','tm-schedule-form','tm-schedule-bulk-form'].includes(form.id))return;
  e.preventDefault();if(state.busy)return;state.busy=true;const button=form.querySelector('button[type=submit]'),orig=button?.textContent;if(button){button.disabled=true;button.textContent='Memproses…'}
  try{
  if(form.id==='auth-form'){
@@ -942,6 +964,10 @@ document.addEventListener('submit',async e=>{
   const code=String(new FormData(form).get('code')).trim();const {data,error}=await state.db.rpc('join_workspace',{p_code:code});if(error)throw error;
   state.modal=null;await loadAll();notify('Permintaan terkirim. Tunggu persetujuan admin tim.')
  }
+ else if(form.id==='tm-schedule-form'){
+  const d=new FormData(form);await editImportedSchedule(String(d.get('staff_key')||''),String(d.get('day')||''),String(d.get('code')||''));
+ }
+ else if(form.id==='tm-schedule-bulk-form'){await deleteImportedRange(form)}
  else if(form.id==='shift-roster-form')await saveShiftRoster(form);
  else if(form.id==='rack-assign-form')await saveRackAssignment(form);
  else if(form.id==='staff-link-form')await saveStaffLink(form);
@@ -1082,12 +1108,66 @@ function seedDemoNovember(){
  }
  if(changed)persistShiftDemo();
 }
+function scheduleManagerPanel(){
+ if(!isAdmin()||state.mode!=='cloud'||!IMPORTED.staff.length)return '';
+ const day=cleanShiftDate(),today=localDay(),canEdit=day>=today;
+ const first=IMPORTED.staff[0];
+ const options=IMPORTED.staff.map(p=>`<option value="${esc(p.key)}">${esc(p.name)}</option>`).join('');
+ const codeOpts=[['P7','Shift 1 · 07.00–17.00'],['S14','Shift 2 · 14.00–23.00'],['M22','Shift 3 · 21.30–07.00'],['O','Libur'],['AO','Libur AO'],['MT','MT'],['C','Cuti']];
+ return `<details class="tm-schedule-admin" id="tm-schedule-admin">
+ <summary>🗓️ Kelola jadwal impor <span>Admin · edit / hapus</span></summary>
+ <div class="tm-schedule-content">
+  <p class="small muted">Ubah jadwal resmi Excel dan roster cloud sekaligus. Data historis terkunci dan jadwal dengan bukti foto tidak bisa dihapus.</p>
+  <form id="tm-schedule-form" class="tm-schedule-form">
+   <label>Nama karyawan dari Excel<select class="field" name="staff_key" id="tm-schedule-staff" required>${options}</select></label>
+   <label>Tanggal kerja<input class="field" type="date" name="day" id="tm-schedule-date" min="${today}" value="${day>=today?day:today}" required></label>
+   <label>Kode / shift baru<select class="field" name="code" id="tm-schedule-code">${codeOpts.map(([code,label])=>`<option value="${code}" ${first.schedule?.[day>=today?day:today]===code?'selected':''}>${esc(label)}</option>`).join('')}</select></label>
+   <div class="tm-schedule-current" id="tm-schedule-current">Jadwal saat ini: ${esc(first.schedule?.[day>=today?day:today]||'Belum ada')}</div>
+   <div class="tm-schedule-actions"><button class="btn primary sm" type="submit">✓ Simpan perubahan</button><button class="btn danger sm" data-action="tm-schedule-delete-one" type="button">Hapus tanggal ini</button></div>
+  </form>
+  <details class="tm-schedule-range"><summary>Hapus beberapa tanggal sekaligus</summary>
+   <form id="tm-schedule-bulk-form" class="tm-schedule-form">
+    <label>Nama<select class="field" name="staff_key" required>${options}</select></label>
+    <label>Dari<input class="field" name="from" type="date" min="${today}" value="${day>=today?day:today}" required></label>
+    <label>Sampai<input class="field" name="to" type="date" min="${today}" value="${day>=today?day:today}" required></label>
+    <button class="btn danger sm" type="submit">Hapus jadwal pada rentang ini</button>
+   </form><p class="small muted">Maksimum 62 hari. Jika satu tanggal memiliki bukti/penugasan, seluruh penghapusan dibatalkan.</p>
+  </details>
+ </div></details>`;
+}
+function refreshScheduleEditorHint(){
+ const form=document.getElementById('tm-schedule-form');if(!form)return;
+ const p=IMPORTED.staff.find(x=>x.key===form.elements.staff_key.value),day=form.elements.day.value;
+ const code=p?.schedule?.[day]||'';
+ const hint=document.getElementById('tm-schedule-current');if(hint)hint.textContent='Jadwal di Cloud: '+(code||'Belum ada / dihapus');
+ const select=form.elements.code;if(select&&code&&[...select.options].some(x=>x.value===code))select.value=code;
+}
+async function editImportedSchedule(staffKey,day,code){
+ if(state.mode!=='cloud'||!isAdmin())throw Error('Hanya Admin Tim yang bisa mengubah jadwal.');
+ const person=IMPORTED.staff.find(p=>p.key===staffKey);if(!person)throw Error('Nama karyawan tidak ditemukan.');
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(day))throw Error('Tanggal tidak valid.');
+ const initial=person.schedule?.[day]||'Tidak ada';
+ if(!confirm(`${person.name} • ${day}\nJadwal sebelumnya: ${initial}\nJadwal baru: ${code||'HAPUS'}\n\nPerbarui data impor dan roster cloud sekaligus?`))return;
+ const {data,error}=await state.db.rpc('update_imported_staff_schedule',{p_workspace:state.workspace.id,p_staff_key:staffKey,p_day:day,p_code:code||null});
+ if(error)throw error;
+ await refreshCloud();notify(data?.changed===false?'Jadwal sudah sesuai Cloud':'Jadwal berhasil diperbarui di Cloud dan HP');
+}
+async function deleteImportedRange(form){
+ if(state.mode!=='cloud'||!isAdmin())throw Error('Hanya admin yang bisa menghapus jadwal.');
+ const d=new FormData(form),staffKey=String(d.get('staff_key')||''),from=String(d.get('from')||''),to=String(d.get('to')||'');
+ const person=IMPORTED.staff.find(p=>p.key===staffKey);if(!person)throw Error('Nama karyawan tidak valid.');
+ if(!confirm(`HAPUS jadwal ${person.name} dari ${from} sampai ${to}?\nRiwayat foto/checklist terlindungi. Tindakan ini tidak dapat dibatalkan.`))return;
+ const {data,error}=await state.db.rpc('delete_imported_schedule_range',{p_workspace:state.workspace.id,p_staff_key:staffKey,p_from:from,p_to:to});
+ if(error)throw error;
+ await refreshCloud();notify(`${data??0} tanggal jadwal dihapus dari Cloud`);
+}
 function rosterSourcePanel(s=state.shiftNumber){
  const day=cleanShiftDate(),fileDay=IMPORTED.staff.some(p=>Object.hasOwn(p.schedule||{},day)),planned=staffForDay(s,day),linked=planned.filter(p=>linkedUid(p));
  return `<section class="panel source-roster-panel"><div class="shift-summary-head"><h3>📅 Jadwal dari Excel · Shift ${s}</h3><span>${esc(SHIFT_HOURS[s])}</span></div>
  <p class="small muted" style="margin-bottom:10px">Sumber: Excel yang diimpor oleh admin. Kode ${CODE_FOR_SHIFT[s]}; Shift 3 dicatat sesuai tanggal mulai 21.30.</p>
  ${fileDay?(planned.length?`<div class="staff-chip-grid">${planned.map(p=>`<div class="staff-source-chip"><strong>${esc(p.name)}</strong><small>${p.racks.length} rak · ${esc(p.schedule[day])}</small><span class="${linkedUid(p)?'linked':'pending'}">${linkedUid(p)?'✓ '+(state.mode==='demo'?'Data demo': 'Akun ditautkan'):'Akun belum ditautkan'}</span></div>`).join('')}</div>`:'<div class="notice info">Tidak ada karyawan dengan kode shift ini pada tanggal terpilih.</div>'):'<div class="notice info">Tidak ada jadwal terimpor untuk tanggal ini. Admin dapat mengimpor Excel bulan baru.</div>'}
  ${state.mode==='cloud'&&planned.length?`<p class="small muted" style="margin-top:10px">${linked.length}/${planned.length} akun ditautkan. Hanya akun yang ditautkan dan sudah diimpor ke roster online yang dapat menerima push.</p>`:''}
+ ${scheduleManagerPanel()}
  </section>`;
 }
 function staffLinkPanel(){
@@ -1100,7 +1180,7 @@ function staffLinkPanel(){
  ${state.staffLinkError?`<div class="notice" style="margin-bottom:10px">⚠ ${esc(state.staffLinkError)} · Jalankan schema-shift-v4.sql di Supabase.</div>`:''}
  ${state.mode==='demo'?'<div class="notice info">Mode demo memakai 12 karyawan contoh dari jadwal. Untuk multi-HP, aktifkan Supabase dan hubungkan akun anggota tim.</div>':''}
  ${state.mode==='cloud'&&isAdmin()&&!state.staffLinkError?`${pending.length&&available.length?`<form id="staff-link-form" class="shift-roster-form"><label>Nama dalam file Excel</label><select class="field" name="staff_key" required>${pending.map(p=>`<option value="${esc(p.key)}">${esc(p.name)}</option>`).join('')}</select><label>Akun yang sudah bergabung ke tim</label><select class="field" name="user_id" required>${available.map(m=>`<option value="${esc(m.user_id)}">${esc(memberName(m.user_id))}</option>`).join('')}</select><button class="btn primary block" type="submit">🔗 Hubungkan & impor jadwal/rak</button></form>`:'<p class="small muted">Tidak ada kombinasi nama dan akun yang belum ditautkan. Pastikan karyawan sudah login dan bergabung dengan kode tim.</p>'}
- ${state.staffLinks.length?`<button class="btn outline block" data-action="v4-sync-import" style="margin-top:9px">↻ Sinkron ulang jadwal & rak untuk akun tertaut</button>`:''}`:''}
+ ${state.staffLinks.length?`<button class="btn outline block" data-action="v4-sync-import" style="margin-top:9px">↻ Cocokkan roster online dengan jadwal Cloud</button>`:''}`:''}
  ${state.staffLinks.length?`<div class="staff-link-list">${state.staffLinks.map(l=>{const p=IMPORTED.staff.find(x=>x.key===l.staff_key);return p?`<div><b>${esc(p.name)}</b><small>${esc(memberName(l.user_id))} · ${p.racks.length} rak</small></div>`:''}).join('')}</div>`:''}
  <p class="small muted" style="margin-top:10px">P7: 07.00–17.00 • S14: 14.00–23.00 • M22: 21.30–07.00. Kode O/AO/MT/C tidak dikirim pengingat shift.</p></section>`;
 }
@@ -1192,10 +1272,23 @@ async function saveStaffLink(form){
  await refreshCloud();notify(`Akun ${person.name} terhubung · jadwal dan ${person.racks.length} rak diimpor`);
 }
 async function syncImported(){
- if(state.mode!=='cloud'||!isAdmin())throw new Error('Hanya admin online yang dapat sinkron.');
- if(!confirm('Sinkronkan roster online dan rak aktif untuk semua karyawan yang ditautkan? Bukti kerja yang sudah ada tidak dihapus.'))return;
- for(const l of state.staffLinks){const person=IMPORTED.staff.find(p=>p.key===l.staff_key);if(person)await importOneStaff(person,l.user_id)}
- await refreshCloud();notify('Jadwal dan daftar rak berhasil disinkron ulang');
+ if(state.mode!=='cloud'||!isAdmin())throw new Error('Hanya Admin Tim yang dapat menyinkronkan impor.');
+ if(!confirm('Ambil jadwal resmi terbaru dari Cloud dan selaraskan roster ONLINE untuk karyawan tertaut? Jadwal yang telah dihapus tidak dikembalikan.'))return;
+ // Atomic RPC is the only path to modifying the official roster; it preserves protected records.
+ let updated=0;
+ for(const link of state.staffLinks){
+  const staff=IMPORTED.staff.find(p=>p.key===link.staff_key);if(!staff)continue;
+  const days=new Set(Object.keys(staff.schedule||{}).filter(d=>d>=localDay()));
+  const r=await state.db.from('shift_roster').select('work_date').eq('workspace_id',state.workspace.id).eq('user_id',link.user_id).gte('work_date',localDay());
+  if(r.error)throw r.error;for(const x of r.data||[])days.add(x.work_date);
+  for(const day of [...days].sort()){
+   const {data,error}=await state.db.rpc('update_imported_staff_schedule',{
+    p_workspace:state.workspace.id,p_staff_key:staff.key,p_day:day,p_code:staff.schedule?.[day]||null
+   });if(error)throw new Error(`${staff.name} • ${day}: ${error.message}`);
+   if(data?.changed)updated++;
+  }
+ }
+ await refreshCloud();notify(`Cloud tersinkron · ${updated} perubahan roster diterapkan`);
 }
 
 function effectiveShiftVersion(key,s=state.shiftNumber,day=cleanShiftDate()){
@@ -1442,7 +1535,7 @@ function shiftPage(){
  const s=state.shiftNumber,day=cleanShiftDate(),areas=shiftAreasFor(s),work=shiftScheduled(s),done=myShiftDoneCount(s),all=myShiftTotal(s),can=shiftCanCheck(s);
  const filter=state.shiftFilter;
  return `${shiftTabs()}<section class="shift-hero"><div><div class="tagline">DAILY SHIFT CHECKLIST</div><h2>Shift ${s} · Operasional Toko</h2><p>Checklist per area, pencapaian, PIC rak, foto tiap rak dan Map Do It per petugas.</p><span class="shift-status">${esc(todayShiftStatus(s))}</span></div><div class="shift-hero-score"><b>${done}<small> / ${all}</small></b><span>Pekerjaan selesai</span></div></section>
- <div class="shift-page-controls">${dateControls()}<button class="btn outline sm" data-action="shift-export">↓ Rekap Shift ${s}</button></div>
+ <div class="shift-page-controls">${dateControls()}<button type="button" class="btn soft sm" data-action="sync">↻ Sinkronkan Sekarang</button><button class="btn outline sm" data-action="shift-export">↓ Rekap Shift ${s}</button></div>
  ${rosterSourcePanel(s)}
  ${shiftAssignmentPanel(s)}
  ${shiftPointManager(s)}
